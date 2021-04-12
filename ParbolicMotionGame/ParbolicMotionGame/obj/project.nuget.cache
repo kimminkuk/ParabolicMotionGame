@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "dgSpecHash": "aBCsZQPko8T72Ks4wvdoq7Q11SzpuFmMVJ67RS44y/nGRbxn1rqLGUOUj5qEQcdo/ML8JbfQgv/GSdvc7XLE4g==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\rlaal\\source\\repos\\ParbolicMotionGame\\ParbolicMotionGame\\ParbolicMotionGame\\ParbolicMotionGame.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\rlaal\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\rlaal\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512",
+    "C:\\Users\\rlaal\\.nuget\\packages\\skiasharp\\2.80.3-preview.40\\skiasharp.2.80.3-preview.40.nupkg.sha512",
+    "C:\\Users\\rlaal\\.nuget\\packages\\skiasharp.views.forms\\2.80.3-preview.40\\skiasharp.views.forms.2.80.3-preview.40.nupkg.sha512",
+    "C:\\Users\\rlaal\\.nuget\\packages\\system.buffers\\4.4.0\\system.buffers.4.4.0.nupkg.sha512",
+    "C:\\Users\\rlaal\\.nuget\\packages\\system.memory\\4.5.3\\system.memory.4.5.3.nupkg.sha512",
+    "C:\\Users\\rlaal\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512",
+    "C:\\Users\\rlaal\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\4.5.2\\system.runtime.compilerservices.unsafe.4.5.2.nupkg.sha512",
+    "C:\\Microsoft\\Xamarin\\NuGet\\xamarin.essentials\\1.5.3.2\\xamarin.essentials.1.5.3.2.nupkg.sha512",
+    "C:\\Microsoft\\Xamarin\\NuGet\\xamarin.forms\\4.8.0.1451\\xamarin.forms.4.8.0.1451.nupkg.sha512"
+  ],
+  "logs": []
+}

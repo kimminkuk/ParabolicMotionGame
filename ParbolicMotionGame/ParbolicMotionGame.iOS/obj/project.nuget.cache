@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "ATjyc8UgZ0KK0a1BsS2BmlHjwNf8I9ou31y7fL7oit9fum9OJkszB2793i5Zjw4SHLaJ8frYnL+ya4BFPMQBBg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\rlaal\\source\\repos\\ParbolicMotionGame\\ParbolicMotionGame\\ParbolicMotionGame.iOS\\ParbolicMotionGame.iOS.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\rlaal\\.nuget\\packages\\skiasharp\\2.80.3-preview.40\\skiasharp.2.80.3-preview.40.nupkg.sha512",
+    "C:\\Users\\rlaal\\.nuget\\packages\\skiasharp.views\\2.80.3-preview.40\\skiasharp.views.2.80.3-preview.40.nupkg.sha512",
+    "C:\\Users\\rlaal\\.nuget\\packages\\skiasharp.views.forms\\2.80.3-preview.40\\skiasharp.views.forms.2.80.3-preview.40.nupkg.sha512",
+    "C:\\Microsoft\\Xamarin\\NuGet\\xamarin.essentials\\1.5.3.2\\xamarin.essentials.1.5.3.2.nupkg.sha512",
+    "C:\\Microsoft\\Xamarin\\NuGet\\xamarin.forms\\4.8.0.1451\\xamarin.forms.4.8.0.1451.nupkg.sha512"
+  ],
+  "logs": []
+}

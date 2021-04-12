@@ -1,0 +1,14 @@
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\ParbolicMotionGame.csprojAssemblyReference.cache
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\App.xaml.g.cs
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\MainPage.xaml.g.cs
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\ParbolicMotionGame.AssemblyInfoInputs.cache
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\ParbolicMotionGame.AssemblyInfo.cs
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\ParbolicMotionGame.csproj.CoreCompileInputs.cache
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\ParbolicMotionGame.dll
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\ref\ParbolicMotionGame.dll
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\ParbolicMotionGame.pdb
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\bin\Debug\netstandard2.0\ParbolicMotionGame.deps.json
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\bin\Debug\netstandard2.0\ParbolicMotionGame.dll
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\bin\Debug\netstandard2.0\ref\ParbolicMotionGame.dll
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\bin\Debug\netstandard2.0\ParbolicMotionGame.pdb
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\XamlC.stamp
