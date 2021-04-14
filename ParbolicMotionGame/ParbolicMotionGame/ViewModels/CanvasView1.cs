@@ -48,7 +48,11 @@ namespace ParbolicMotionGame.ViewModels
 
         //New
         const int LEVEL_MAX = 5;
+        const int pos_y_Increase = 25;
         public bool[] wall_pn = new bool[LEVEL_MAX];
+        public bool pos_y_ceiling_touch = false;
+        public int pos_y_ceiling_touchIncrease = pos_y_Increase;
+        public float xpos_mirror = 0; 
 
         //Binding Text
         int game_power = 0;
@@ -91,24 +95,28 @@ namespace ParbolicMotionGame.ViewModels
             {
                 canvas.Clear();
 
+                /*
+                 * Main Canvas Paint Collection
+                 * Ball, Init Ball, Restrict Bound, Goal Block 
+                 */
+                SKPaint paint = new SKPaint();
+                SKPaint paint_restrictcircle = new SKPaint();
+                SKPaint paintInitBall = new SKPaint();
+                SKPaint paint_GoalBlock = new SKPaint();
+                Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock);
+
                 //Switch Case.. Level 1,Level2...Level5
                 /*
                  * Game Level 1,2,3,4,5
                  * Switch - case ?
                  * rect position cal : GameLevel 1
                  */
-                rect_position_cal(1, info);
+                GoalBlockRectPosition(Game_level, info, canvas, paint_GoalBlock);
 
                 /*
                  * BALL: Start Position
                  */
-                Init_Location_set(1, info);
-
-                //Test Paint Collection
-                SKPaint paint = new SKPaint();
-                SKPaint paint_restrictcircle = new SKPaint();
-                SKPaint paintInitBall = new SKPaint();
-                Paint_Collection(paint, paint_restrictcircle, paintInitBall);
+                InitBallPostion(Game_level, info);
 
                 //Init Restrict Circle Location Paint
                 SKCanvas canvas_restrictcircle = surface.Canvas;
@@ -139,42 +147,115 @@ namespace ParbolicMotionGame.ViewModels
                 Game_rad = (int)(control_rcos_abs * 100);
 
                 //TEST PARABOLIC MOTION
-                int i_2 = 0;
+                //int i_2 = 0;
                 for (int i = parabolic_cnt - 1; i < parabolic_cnt; i++)
                 {
                     if (i == -1) continue;
-
+                    
                     float t = (float)i / 80;
                     float g = 5 * t;
 
                     float x = (float)(Vo_test * control_rcos_abs) * t + Init_x;
                     float y = ((float)(Vo_test * control_rsin_abs) * t - g * t * 4); //info.Height ( ex) 640 )
-
+                    //float y_Upside = 0;
+                    
                     y = Init_y - y;
-                    if (y < 0) //ex) -3 -30 - 100.. -30 -3
+
+                    //처음 천장 맞은 경우
+                    //한번 실행하면서 순간 Y좌표를 저장한다.
+                    if (!pos_y_ceiling_touch && y < 0)                    
                     {
-                        i_2++;
-                        Vo_test = (float)(Vo_test * 0.9);
-                        t = (float)i_2 / 50;
-                        g = 5 * t;
-                        y = (y * -1) + g * t * 4; //중력가속도 추가, 부딪힐때마다 파워 감소
+                        pos_y_ceiling_touch = true;
                     }
 
-                    if (wall_pn[0] != true && x >= (float)0.6 * info.Width &&
-                       x <= (float)0.62 * info.Width && y >= (float)0.2 * info.Height)
+                    //천장 맞으면 자유 낙하 운동 개념으로 떨어지게..
+                    if (pos_y_ceiling_touch)
                     {
-                        wall_pn[0] = true;
+                        pos_y_ceiling_touchIncrease++;
+                        float t_y = (float)pos_y_ceiling_touchIncrease / 30;
+                        float g_y = 6 * t_y;
+                        y = t_y * g_y * 5;
                     }
-                    if (wall_pn[0])
+
+                    switch (Game_level)
                     {
-                        x = (float)0.6 * info.Width + ((float)0.6 * info.Width - x);
+                        case 1:
+                            if (wall_pn[0] != true && x >= (float)0.6 * info.Width &&
+                                x <= (float)0.62 * info.Width && y >= (float)0.2 * info.Height 
+                                && y <= (float)0.8 * info.Height)
+                            {
+                                wall_pn[0] = true;
+                            }
+                            if (wall_pn[0])
+                            {
+                                x = (float)0.6 * info.Width + ((float)0.6 * info.Width - x);
+                            }
+                            break;
+                        case 2:
+                            if (wall_pn[1] != true && x >= (float)0.55 * info.Width &&
+                                x <= (float)0.57 * info.Width && y >= (float)0.15 * info.Height
+                                && y <= (float)0.7 * info.Height)
+                            {
+                                wall_pn[1] = true;
+                            }
+                            if (wall_pn[1])
+                            {
+                                x = (float)0.55 * info.Width + ((float)0.55 * info.Width - x);
+                            }
+                            break;
+                        case 3:
+                            if (wall_pn[2] != true && x >= (float)0.5 * info.Width &&
+                                x <= (float)0.52* info.Width && y >= (float)0.15 * info.Height
+                                && y <= (float)0.20 * info.Height)
+                            {
+                                wall_pn[2] = true;
+                                xpos_mirror = (float)0.51;
+                            }
+                            else if (wall_pn[2] != true && x >= (float)0.52 * info.Width &&
+                                x <= (float)0.54 * info.Width && y >= (float)0.20 * info.Height
+                                && y <= (float)0.25 * info.Height)
+                            {
+                                wall_pn[2] = true;
+                                xpos_mirror = (float)0.53;
+                            }
+                            else if (wall_pn[2] != true && x >= (float)0.54 * info.Width &&
+                                x <= (float)0.56 * info.Width && y >= (float)0.25 * info.Height
+                                && y <= (float)0.4 * info.Height)
+
+                            {
+                                wall_pn[2] = true;
+                                xpos_mirror = (float)0.55;
+                            }
+                            else if (wall_pn[2] != true && x >= (float)0.58 * info.Width &&
+                                x <= (float)0.60 * info.Width && y >= (float)0.4 * info.Height
+                                && y <= (float)0.55 * info.Height)
+                            {
+                                wall_pn[2] = true;
+                                xpos_mirror = (float)0.57;
+                            }
+                            else if (wall_pn[2] != true && x >= (float)0.60 * info.Width &&
+                                x <= (float)0.62 * info.Width && y >= (float)0.55 * info.Height
+                                && y <= (float)0.7 * info.Height)
+                            {
+                                wall_pn[2] = true;
+                                xpos_mirror = (float)0.59;
+                            }
+
+                            if (wall_pn[2])
+                            {
+                                x = (float)xpos_mirror * info.Width + ((float)xpos_mirror * info.Width - x);
+                            }
+                            break;
+                        
+                        default:
+                            break;
                     }
 
                     //GAME END
                     if (y > info.Height || x < 0 || x > info.Width)
                     {
                         //Game End Setting, Variable initialization
-                        GameEndandInitSetting(sender, surface, info);
+                        GameEndandInitSetting(sender, Game_level, surface, info);
                         break;
                     }
 
@@ -188,7 +269,7 @@ namespace ParbolicMotionGame.ViewModels
                     //yes-> Level Up, No-> Game End
                     if (x > (float)(info.Width * 0.75))
                     {
-                        GoalBlockDamageCount(x, y, info);
+                        GoalBlockDamageCount(Game_level, x, y, info);
                     }
                     //공 위치 갱신 Draw
                     canvas.DrawCircle(x, y, (float)0.01 * info.Width, paint);
@@ -200,7 +281,7 @@ namespace ParbolicMotionGame.ViewModels
             }
         }
 
-        private void Paint_Collection(SKPaint paint, SKPaint paint_restrictcircle, SKPaint paintInitBall)
+        private void Paint_Collection(SKPaint paint, SKPaint paint_restrictcircle, SKPaint paintInitBall, SKPaint paint_GoalBlock)
         {
             //Ball Paint
             paint.IsAntialias = true;
@@ -219,28 +300,74 @@ namespace ParbolicMotionGame.ViewModels
             paintInitBall.Style = SKPaintStyle.Fill;
             paintInitBall.Color = Color.Red.ToSKColor();
             paintInitBall.StrokeWidth = 5;
+
+            //Goal Block Paint
+            paint_GoalBlock.IsAntialias = true;
+            paint_GoalBlock.Style = SKPaintStyle.Fill;
+            paint_GoalBlock.Color = Color.Blue.ToSKColor();
         }
 
-        private void GoalBlockDamageCount(float x, float y, SKImageInfo info)
+        private void GoalBlockDamageCount(int LEVEL, float x, float y, SKImageInfo info)
         {
-            for (int row = 0; row < 4; row++)
+            switch (LEVEL)
             {
-                if (rect_pn[row] == true && rect_point[row] < x && rect_point[row + 1] > x)
-                {
-                    for (int col = 0; col < 4; col++)
+                case 1:
+                    for (int row = 0; row < 4; row++)
                     {
-                        //col 0~1, 1~2, 2~3, 3~4
-                        if (rect_pn[4 * col + row] == true && rect_point[col + 5] < y && rect_point[col + 6] > y)
+                        if (rect_pn[row] == true && rect_point[row] < x && rect_point[row + 1] > x)
                         {
-                            rect_pn[4 * col + row] = false;
-                            Game_score++;
-
-                            //if change, redraw
-                            new MainPage().CanvasView2_Invalidate();
+                            for (int col = 0; col < 4; col++)
+                            {
+                                //col 0~1, 1~2, 2~3, 3~4
+                                if (rect_pn[4 * col + row] == true && rect_point[col + 5] < y && rect_point[col + 6] > y)
+                                {
+                                    rect_pn[4 * col + row] = false;
+                                    Game_score++;
+                                }
+                            }
                         }
                     }
+                    break;
 
-                }
+                case 2:
+                    for (int row = 1; row < 4; row++)
+                    {
+                        //row 1~2, 2~3, 3~4
+                        if (rect_pn[row] == true && rect_point[row] < x && rect_point[row + 1] > x)
+                        {
+                            for (int col = 0; col < 3; col++)
+                            {
+                                //col 0~1, 1~2, 2~3
+                                if (rect_pn[4 * col + row] == true && rect_point[col + 5] < y && rect_point[col + 6] > y)
+                                {
+                                    rect_pn[4 * col + row] = false;
+                                    Game_score++;
+                                }
+                            }
+                        }
+                    }
+                    break;
+
+                case 3:
+                    for (int row = 2; row < 4; row++)
+                    {
+                        //row 2~3, 3~4
+                        if (rect_pn[row] == true && rect_point[row] < x && rect_point[row + 1] > x)
+                        {
+                            for (int col = 0; col < 2; col++)
+                            {
+                                //col 0~1, 1~2
+                                if (rect_pn[4 * col + row] == true && rect_point[col + 5] < y && rect_point[col + 6] > y)
+                                {
+                                    rect_pn[4 * col + row] = false;
+                                    Game_score++;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -260,57 +387,100 @@ namespace ParbolicMotionGame.ViewModels
                 /*
                  * LEVEL 1~5 Wall Make
                  */
-                DefenceWallMake(1,canvas, info);
+                DefenceWallMake(Game_level, canvas, info);
 
                 /*
                  * Goal Block Destroy Effect
                  */
                 SKCanvas canvas_GoalBlock = surface.Canvas;
-                GoalBlockDestroyEffect(1, canvas_GoalBlock, info, surface);
+                GoalBlockDestroyEffect(Game_level, canvas_GoalBlock, info, surface);
             }
         }
 
         private void GoalBlockDestroyEffect(int LEVEL, SKCanvas canvas, SKImageInfo info, SKSurface surface)
         {
-            //LEVEL 1 Example
-            for (int i = 0; i < 5; i++)
-            {
-                rect_point[i] = (float)(info.Width * 0.75 + info.Width * (0.25 / 4) * i);
-            }
-
-            rect_point[5] = (float)(info.Height * 0.2);
-            rect_point[6] = (float)(info.Height * 0.4);
-            rect_point[7] = (float)(info.Height * 0.6);
-            rect_point[8] = (float)(info.Height * 0.8);
-            rect_point[9] = (float)(info.Height);
-
-            for (int i = 0; i < 16; i++)
-            {
-                rect[i] = new SKRect(rect_point[i % 4], rect_point[i / 4 + 5],
-                    rect_point[(i % 4) + 1], rect_point[i / 4 + 6]);
-            }
-
+            //  for (int i = 0; i < 5; i++)
+            //  {
+            //      rect_point[i] = (float)(info.Width * 0.75 + info.Width * (0.25 / 4) * i);
+            //  }
+            //  
+            //  rect_point[5] = (float)(info.Height * 0.2);
+            //  rect_point[6] = (float)(info.Height * 0.4);
+            //  rect_point[7] = (float)(info.Height * 0.6);
+            //  rect_point[8] = (float)(info.Height * 0.8);
+            //  rect_point[9] = (float)(info.Height);
+            //  
+            //  for (int i = 0; i < 16; i++)
+            //  {
+            //      rect[i] = new SKRect(rect_point[i % 4], rect_point[i / 4 + 5],
+            //          rect_point[(i % 4) + 1], rect_point[i / 4 + 6]);
+            //  }
+            // 
             SKPaint paintGoalBlock = new SKPaint
             {
                 Style = SKPaintStyle.Fill,
                 Color = Color.Blue.ToSKColor()
             };
-
-            for (int i = 0; i < 16; i++)
+            switch(LEVEL)
             {
-                if (rect_pn[i])
-                    canvas.DrawRect(rect[i], paintGoalBlock);
-                else //Rotation Block or Delete Block
-                {
-                    //Thread?
-                    //StartTimer_BlockRotation();
-                    timer_stop_PN_BlockRotation = true;
+                case 1:
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (rect_pn[i])
+                            canvas.DrawRect(rect[i], paintGoalBlock);
+                        else //Rotation Block or Delete Block
+                             //if (!rect_pn[i]) //Goal Block Destroy case
+                        {
+                            //Thread?
+                            //StartTimer_BlockRotation();
+                            timer_stop_PN_BlockRotation = true;
 
-                    float rotation_x = (rect_point[i % 4] + rect_point[(i % 4) + 1]) / 2;
-                    float rotation_y = (rect_point[i / 4 + 5] + rect_point[i / 4 + 6]) / 2;
-                    OnDrawRoation(LEVEL, rotation_x, rotation_y, info, surface);
+                            float rotation_x = (rect_point[i % 4] + rect_point[(i % 4) + 1]) / 2;
+                            float rotation_y = (rect_point[i / 4 + 5] + rect_point[i / 4 + 6]) / 2;
+                            OnDrawRoation(LEVEL, rotation_x, rotation_y, info, surface);
+                        }
+                    }
+                    break;
+                case 2:
+                    for (int i = 1; i < 4; i++)
+                    {
+                        for(int j = 0; j < 3; j++)
+                        {
+                            int position = i + j * 4;
+                            if (rect_pn[position])
+                                canvas.DrawRect(rect[position], paintGoalBlock);
+                            else 
+                            {
+                                timer_stop_PN_BlockRotation = true;
 
-                }
+                                float rotation_x = (rect_point[position % 4] + rect_point[(position % 4) + 1]) / 2;
+                                float rotation_y = (rect_point[position / 4 + 5] + rect_point[position / 4 + 6]) / 2;
+                                OnDrawRoation(LEVEL, rotation_x, rotation_y, info, surface);
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                    for (int i = 2; i < 4; i++)
+                    {
+                        for (int j = 0; j < 2; j++)
+                        {
+                            int position = i + j * 4;
+                            if (rect_pn[position])
+                                canvas.DrawRect(rect[position], paintGoalBlock);
+                            else
+                            {
+                                timer_stop_PN_BlockRotation = true;
+
+                                float rotation_x = (rect_point[position % 4] + rect_point[(position % 4) + 1]) / 2;
+                                float rotation_y = (rect_point[position / 4 + 5] + rect_point[position / 4 + 6]) / 2;
+                                OnDrawRoation(LEVEL, rotation_x, rotation_y, info, surface);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -420,20 +590,74 @@ namespace ParbolicMotionGame.ViewModels
         private void DefenceWallMake(int LEVEL, SKCanvas canvas, SKImageInfo info)
         {
             //LEVEL 1 Example
-            SKPoint[] points2 = new SKPoint[4];
-            points2[0] = new SKPoint((float)0.6 * info.Width, (float)0.2 * info.Height);
-            points2[1] = new SKPoint((float)0.61 * info.Width, (float)0.2 * info.Height);
-            points2[2] = new SKPoint((float)0.6 * info.Width, (float)0.8 * info.Height);
-            points2[3] = new SKPoint((float)0.61 * info.Width, (float)0.8 * info.Height);
-
-            SKPaint paintWall = new SKPaint
+            switch(LEVEL)
             {
-                Style = SKPaintStyle.Fill,
-                Color = Color.Blue.ToSKColor(),
-                StrokeWidth = (float)(info.Width * 0.015)
-            };
+                case 1:
+                    SKPoint[] DefenceWallLevel_1 = new SKPoint[4];
+                    DefenceWallLevel_1[0] = new SKPoint((float)0.6 * info.Width, (float)0.2 * info.Height);
+                    DefenceWallLevel_1[1] = new SKPoint((float)0.61 * info.Width, (float)0.2 * info.Height);
+                    DefenceWallLevel_1[2] = new SKPoint((float)0.6 * info.Width, (float)0.8 * info.Height);
+                    DefenceWallLevel_1[3] = new SKPoint((float)0.61 * info.Width, (float)0.8 * info.Height);
 
-            canvas.DrawLine(points2[0], points2[2], paintWall);
+                    SKPaint paintDefenceWallLevel_1 = new SKPaint
+                    {
+                        Style = SKPaintStyle.Fill,
+                        Color = Color.Blue.ToSKColor(),
+                        StrokeWidth = (float)(info.Width * 0.015)
+                    };
+
+                    canvas.DrawLine(DefenceWallLevel_1[0], DefenceWallLevel_1[2], paintDefenceWallLevel_1);
+                    break;
+                case 2:
+                    SKPoint[] DefenceWallLevel_2 = new SKPoint[4];
+                    DefenceWallLevel_2[0] = new SKPoint((float)0.55 * info.Width, (float)0.15 * info.Height);
+                    DefenceWallLevel_2[1] = new SKPoint((float)0.56 * info.Width, (float)0.15 * info.Height);
+                    DefenceWallLevel_2[2] = new SKPoint((float)0.55 * info.Width, (float)0.7 * info.Height);
+                    DefenceWallLevel_2[3] = new SKPoint((float)0.56 * info.Width, (float)0.7 * info.Height);
+
+                    SKPaint paintDefenceWallLevel_2 = new SKPaint
+                    {
+                        Style = SKPaintStyle.Fill,
+                        Color = Color.DarkGreen.ToSKColor(),
+                        StrokeWidth = (float)(info.Width * 0.015)
+                    };
+
+                    canvas.DrawLine(DefenceWallLevel_2[0], DefenceWallLevel_2[2], paintDefenceWallLevel_2);
+                    break;
+                case 3:
+                    SKPoint[] DefenceWallLevel_3 = new SKPoint[4];
+                    DefenceWallLevel_3[0] = new SKPoint((float)0.5 * info.Width,  (float)0.15 * info.Height);
+                    //DefenceWallLevel_3[1] = new SKPoint((float)0.55 * info.Width, (float)0.1 * info.Height);
+                    //DefenceWallLevel_3[2] = new SKPoint((float)0.75 * info.Width, (float)0.7 * info.Height);
+                    DefenceWallLevel_3[3] = new SKPoint((float)0.7 * info.Width,  (float)0.75 * info.Height);
+
+                    SKPaint paintDefenceWallLevel_3 = new SKPaint
+                    {
+                        Style = SKPaintStyle.Fill,
+                        Color = Color.Black.ToSKColor(),
+                        StrokeWidth = (float)(info.Width * 0.015)
+                    };
+
+                    canvas.DrawLine(DefenceWallLevel_3[0], DefenceWallLevel_3[3], paintDefenceWallLevel_3);
+                    break;
+
+                default:
+                    break;
+            }
+           // SKPoint[] points2 = new SKPoint[4];
+           // points2[0] = new SKPoint((float)0.6 * info.Width, (float)0.2 * info.Height);
+           // points2[1] = new SKPoint((float)0.61 * info.Width, (float)0.2 * info.Height);
+           // points2[2] = new SKPoint((float)0.6 * info.Width, (float)0.8 * info.Height);
+           // points2[3] = new SKPoint((float)0.61 * info.Width, (float)0.8 * info.Height);
+           //
+           // SKPaint paintWall = new SKPaint
+           // {
+           //     Style = SKPaintStyle.Fill,
+           //     Color = Color.Blue.ToSKColor(),
+           //     StrokeWidth = (float)(info.Width * 0.015)
+           // };
+           //
+           // canvas.DrawLine(points2[0], points2[2], paintWall);
         }
 
         public void TouchMotion(object sender, SKTouchEventArgs e)
@@ -474,41 +698,117 @@ namespace ParbolicMotionGame.ViewModels
             }
         }
 
-        private void rect_position_cal(int LEVEL, SKImageInfo info)
+        private void GoalBlockRectPosition(int LEVEL, SKImageInfo info, SKCanvas canvas, SKPaint paint_GoalBlock)
         {
-            //End Point Block Location Setting
-            for (int i = 0; i < 5; i++)
+            switch(LEVEL)
             {
-                rect_point[i] = (float)(info.Width * 0.75 + info.Width * (0.25 / 4) * i);
-            }
-            rect_point[5] = (float)(info.Height * 0.2);
-            rect_point[6] = (float)(info.Height * 0.4);
-            rect_point[7] = (float)(info.Height * 0.6);
-            rect_point[8] = (float)(info.Height * 0.8);
-            rect_point[9] = (float)(info.Height);
-            for (int i = 0; i < 16; i++)
-            {
-                rect[i] = new SKRect(rect_point[i % 4], rect_point[i / 4 + 5],
-                    rect_point[(i % 4) + 1], rect_point[i / 4 + 6]);
+                case 1:
+                    //LEVEL1 Goal Point Block Location Setting
+                    for (int i = 0; i < 5; i++)
+                    {
+                        rect_point[i] = (float)(info.Width * 0.75 + info.Width * (0.25 / 4) * i);
+                    }
+                    rect_point[5] = (float)(info.Height * 0.2);
+                    rect_point[6] = (float)(info.Height * 0.4);
+                    rect_point[7] = (float)(info.Height * 0.6);
+                    rect_point[8] = (float)(info.Height * 0.8);
+                    rect_point[9] = (float)(info.Height);
+                    for (int i = 0; i < 16; i++)
+                    {
+                        rect[i] = new SKRect(rect_point[i % 4], rect_point[i / 4 + 5],
+                            rect_point[(i % 4) + 1], rect_point[i / 4 + 6]);
+
+                        // canvas.DrawRect(rect[i], paint_GoalBlock);
+                    }
+                    break;
+                case 2:
+                    // // //LEVEL2 Goal Point Block Location Setting
+                    // for (int i = 1; i < 4; i++)
+                    // {
+                    //     for (int j = 0; j < 3; j++)
+                    //     {
+                    //         canvas.DrawRect(rect[i + j * 4], paint_GoalBlock);
+                    //     }
+                    // }
+                    break;
+
+                default:
+                    break;
             }
         }
-        private void Init_Location_set(int LEVEL, SKImageInfo info)
+        private void InitBallPostion(int LEVEL, SKImageInfo info)
         {
-            //Init Location Constant
-            InitConstant_X = (float)(info.Width * 0.075);
-            InitConstant_Y = (float)(info.Height * 0.7);
-            default_radius_move_allow = (float)(info.Width * 0.07);
-            default_Init_x = (float)(info.Width * 0.075);
-            default_Init_y = (float)(info.Height * 0.7);
-            
-            //Init Ball Position
-            if (drag_onoff)
+            switch(LEVEL)
             {
-                Init_x = (float)(info.Width * 0.075);
-                Init_y = (float)(info.Height * 0.7);
-            
-                //Init rect_pn
-                for (int i = 0; i < 16; i++) rect_pn[i] = true;
+                case 1:
+                    //LEVEL1 Init Location Constant
+                    InitConstant_X = (float)(info.Width * 0.075);
+                    InitConstant_Y = (float)(info.Height * 0.7);
+                    default_radius_move_allow = (float)(info.Width * 0.07);
+                    default_Init_x = (float)(info.Width * 0.075);
+                    default_Init_y = (float)(info.Height * 0.7);
+
+                    //LEVEL1 Init Ball Position
+                    if (drag_onoff)
+                    {
+                        Init_x = (float)(info.Width * 0.075);
+                        Init_y = (float)(info.Height * 0.7);
+
+                        //Init rect_pn
+                        for (int i = 0; i < 16; i++) rect_pn[i] = true;
+                    }
+                    break;
+                case 2:
+                    //LEVEL2 Init Location Constant
+                    InitConstant_X = (float)(info.Width * 0.075);
+                    InitConstant_Y = (float)(info.Height * 0.5);
+                    default_radius_move_allow = (float)(info.Width * 0.07);
+                    default_Init_x = (float)(info.Width * 0.075);
+                    default_Init_y = (float)(info.Height * 0.5);
+
+                    //LEVEL2 Init Ball Position
+                    if (drag_onoff)
+                    {
+                        Init_x = (float)(info.Width * 0.075);
+                        Init_y = (float)(info.Height * 0.5);
+
+                        //Init rect_pn
+                        for (int i = 1; i < 4; i++)
+                        {
+                            for (int j = 0; j < 3; j++)
+                            {
+                                rect_pn[i + j * 4] = true;
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                    //LEVEL3 Init Location Constant
+                    InitConstant_X = (float)(info.Width * 0.1);
+                    InitConstant_Y = (float)(info.Height * 0.4);
+                    default_radius_move_allow = (float)(info.Width * 0.07);
+                    default_Init_x = (float)(info.Width * 0.1);
+                    default_Init_y = (float)(info.Height * 0.4);
+
+                    //LEVEL3 Init Ball Position
+                    if (drag_onoff)
+                    {
+                        Init_x = (float)(info.Width * 0.1);
+                        Init_y = (float)(info.Height * 0.4);
+
+                        //Init rect_pn
+                        for (int i = 2; i < 4; i++)
+                        {
+                            for (int j = 0; j < 2; j++)
+                            {
+                                rect_pn[i + j * 4] = true;
+                            }
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
             }
         }
         private void Init_Rad_cal()
@@ -531,12 +831,15 @@ namespace ParbolicMotionGame.ViewModels
             default_Init_y = (float)(info.Height * 0.7);
         }
 
-        private void GameEndandInitSetting(object sender, SKSurface surface, SKImageInfo info)
+        private void GameEndandInitSetting(object sender, int LEVEL, SKSurface surface, SKImageInfo info)
         {
             parabolic_cnt = 0;
             time_interval = 0;
             BlockRotationCnt = 0;
             game_over = true;
+            pos_y_ceiling_touch = false;
+            pos_y_ceiling_touchIncrease = pos_y_Increase;
+            xpos_mirror = 0;
             if (timer_stop_PN)
             {
                 timer_stop();
@@ -547,25 +850,42 @@ namespace ParbolicMotionGame.ViewModels
                 Init_y = 0;
 
                 //Init rect_pn
-                for (int j = 0; j < 16; j++)
+                switch(LEVEL)
                 {
-                    //rect_pn = false -> block destory
-                    if (!rect_pn[j]) game_over = false;
-                    rect_pn[j] = true;
+                    case 1:
+                        for (int j = 0; j < 16; j++)
+                        {
+                            //rect_pn = false -> block destory
+                            if (!rect_pn[j]) game_over = false;
+                            rect_pn[j] = true;
+                        }
+                        break;
+                    case 2:
+                        for(int i = 1; i < 4; i++)
+                        {
+                            for(int j = 0; j < 3; j++)
+                            {
+                                if (!rect_pn[i + j * 4]) game_over = false;
+                                rect_pn[i + j * 4] = true;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
-
-            Game_score = 0;
-            Game_level = 1;
             Game_power = 0;
             Game_rad = 0;
 
             if (game_over)
             {
+                Game_score = 0;
+                Game_level = 1;
                 Gameover_textdraw(sender, surface, info);
             }
             else
             {
+                Game_level++;
                 ((SKCanvasView)sender).InvalidateSurface();
             }
 
