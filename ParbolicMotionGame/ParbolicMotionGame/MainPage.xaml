@@ -62,7 +62,8 @@
           
             <skia:SKCanvasView x:Name="CanvasView"
                                PaintSurface="CanvasView_PaintSurface"
-                               EnableTouchEvents="True"
+                               EnableTouchEvents="{Binding Game_touch_enable}"
+                               
                                Touch="CanvasView_Touch"        
                                Grid.Row="1"
                                Grid.RowSpan="2"
