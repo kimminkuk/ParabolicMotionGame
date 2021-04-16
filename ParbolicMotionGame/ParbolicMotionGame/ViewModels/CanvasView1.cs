@@ -95,6 +95,8 @@ namespace ParbolicMotionGame.ViewModels
             if (game_over)
             {
                 canvas.Clear();
+                Game_Btn_Visible = true;
+                Game_Btn_Enable = true;
                 Gameover_textdraw(sender, surface, info);
                 return;
             }
@@ -104,17 +106,19 @@ namespace ParbolicMotionGame.ViewModels
                 if(game_level == 6)
                 {
                     GameClearText(sender, surface, info);
+                    return;
                 }
                 GameLevelTextCanvas(Game_level, sender, surface, info);
                 /*
                  * Main Canvas Paint Collection
-                 * Ball, Init Ball, Restrict Bound, Goal Block 
+                 * Ball, Init Ball, Restrict Bound, Goal Block, paint_PredictArrow 
                  */
                 SKPaint paint = new SKPaint();
                 SKPaint paint_restrictcircle = new SKPaint();
                 SKPaint paintInitBall = new SKPaint();
                 SKPaint paint_GoalBlock = new SKPaint();
-                Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock);
+                SKPaint paint_PredictArrow = new SKPaint();
+                Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock, paint_PredictArrow);
 
                 //Switch Case.. Level 1,Level2...Level5
                 /*
@@ -151,11 +155,16 @@ namespace ParbolicMotionGame.ViewModels
 
                 //TEST ACTION
                 float Vo_test = ((float)Math.Sqrt((Math.Pow(Init_x - default_Init_x, 2) + Math.Pow(Init_y - default_Init_y, 2)))
-                    / default_radius_move_allow) * 300; //500 -> 600 ->
+                    / default_radius_move_allow) * 350; //300은 조금 약하고,, 400은 너무 쌔다..500 -> 600 ->
 
                 //Binding Text Collection
                 Game_power = (int)Vo_test;
                 Game_rad = (int)(control_rcos_abs * 100);
+
+                /*
+                 * Start Direction Prediction Arrow Graphics
+                 */
+                PredictArrowDirection(canvas,paint_PredictArrow);
 
                 //TEST PARABOLIC MOTION
                 //int i_2 = 0;
@@ -242,12 +251,18 @@ namespace ParbolicMotionGame.ViewModels
                                 x = x - 2 * ((float)0.75 * info.Width - (float)0.6 * info.Width);
                                 wall_pn_sub[3] = false;
 
+                                if( x < (float)0.75 * info.Width)
+                                {
+                                    //continue하면 공이 0.1초정도 사라진다.. 이러면 별로야
+                                    x = x - 2 * ((float)0.75 * info.Width - (float)0.6 * info.Width);
+                                }
                                 if (x >= (float)0.75 * info.Width &&x <= (float)0.755 * info.Width 
                                     && y >= (float)0.15 * info.Height && y <= (float)0.5 * info.Height)
                                 {
                                     wall_pn_sub[3] = true;
                                     wall_pn[3] = false;
                                 }
+                                
                             }
                             break;
                         case 5:
@@ -287,6 +302,24 @@ namespace ParbolicMotionGame.ViewModels
                 //canvasView1에서 canvasView2의 Surface 중복해서 쓰는거 될까??
                 PaintSurface_sub(sender, surface, info);
                 
+            }
+        }
+
+        private void PredictArrowDirection(SKCanvas canvas, SKPaint paint_PredictArrow)
+        {
+            if (TouchOnOff)
+            {
+                SKPoint[] PredictArrow = new SKPoint[4];
+                PredictArrow[0] = new SKPoint(Init_x, Init_y);
+                PredictArrow[1] = new SKPoint(Init_x + (Game_power / 3), Init_y - (Game_power / 3));
+                PredictArrow[2] = new SKPoint(Init_x - (Game_power / 20), Init_y - (Game_power / 3));
+                PredictArrow[3] = new SKPoint(Init_x + (Game_power / 3), Init_y + (Game_power / 20));
+
+                paint_PredictArrow.StrokeWidth = Game_power / 60;
+
+                canvas.DrawLine(PredictArrow[0], PredictArrow[1], paint_PredictArrow);
+                canvas.DrawLine(PredictArrow[1], PredictArrow[2], paint_PredictArrow);
+                canvas.DrawLine(PredictArrow[1], PredictArrow[3], paint_PredictArrow);
             }
         }
 
@@ -446,7 +479,7 @@ namespace ParbolicMotionGame.ViewModels
             }
         }
 
-        private void Paint_Collection(SKPaint paint, SKPaint paint_restrictcircle, SKPaint paintInitBall, SKPaint paint_GoalBlock)
+        private void Paint_Collection(SKPaint paint, SKPaint paint_restrictcircle, SKPaint paintInitBall, SKPaint paint_GoalBlock, SKPaint paint_PredictArrow)
         {
             //Ball Paint
             paint.IsAntialias = true;
@@ -470,6 +503,12 @@ namespace ParbolicMotionGame.ViewModels
             paint_GoalBlock.IsAntialias = true;
             paint_GoalBlock.Style = SKPaintStyle.Fill;
             paint_GoalBlock.Color = Color.Blue.ToSKColor();
+
+            //Start Direction Prediction Arrow
+            paint_PredictArrow.IsAntialias = true;
+            paint_PredictArrow.Style = SKPaintStyle.StrokeAndFill;
+            paint_PredictArrow.Color = Color.Red.ToSKColor();
+            //paint_PredictArrow.StrokeWidth = Game_power / 70;
         }
 
         private void GoalBlockDamageCount(int LEVEL, float x, float y, SKImageInfo info)
@@ -582,6 +621,8 @@ namespace ParbolicMotionGame.ViewModels
             {
                 //canvas.Clear();
                 //Gameover_textdraw(sender, surface, info);
+                Game_Btn_Visible = true;
+                Game_Btn_Enable = true;
                 return;
             }
             else
@@ -601,23 +642,6 @@ namespace ParbolicMotionGame.ViewModels
 
         private void GoalBlockDestroyEffect(int LEVEL, SKCanvas canvas, SKImageInfo info, SKSurface surface)
         {
-            //  for (int i = 0; i < 5; i++)
-            //  {
-            //      rect_point[i] = (float)(info.Width * 0.75 + info.Width * (0.25 / 4) * i);
-            //  }
-            //  
-            //  rect_point[5] = (float)(info.Height * 0.2);
-            //  rect_point[6] = (float)(info.Height * 0.4);
-            //  rect_point[7] = (float)(info.Height * 0.6);
-            //  rect_point[8] = (float)(info.Height * 0.8);
-            //  rect_point[9] = (float)(info.Height);
-            //  
-            //  for (int i = 0; i < 16; i++)
-            //  {
-            //      rect[i] = new SKRect(rect_point[i % 4], rect_point[i / 4 + 5],
-            //          rect_point[(i % 4) + 1], rect_point[i / 4 + 6]);
-            //  }
-            // 
             SKPaint paintGoalBlock = new SKPaint
             {
                 Style = SKPaintStyle.Fill,
@@ -941,11 +965,42 @@ namespace ParbolicMotionGame.ViewModels
                     case SKTouchAction.Moved:
                         Init_x = e.Location.X;
                         Init_y = e.Location.Y;
+
+                        switch (Game_level)
+                        {
+                            case 1:
+                            case 2:
+                            case 3:
+                            case 4:
+                            case 5:
+                                dis = (float)(Math.Pow(Init_x - default_Init_x, 2) + Math.Pow(Init_y - default_Init_y, 2));
+                                dis_init_circle = (float)Math.Sqrt(dis);
+
+                                control_rcos = (Init_x - default_Init_x) / dis_init_circle;
+                                control_rsin = (Init_y - default_Init_y) / dis_init_circle;
+
+                                if (dis_init_circle >= default_radius_move_allow)
+                                {
+                                    Init_x = control_rcos * default_radius_move_allow + default_Init_x;
+                                    Init_y = control_rsin * default_radius_move_allow + default_Init_y;
+                                }
+
+                                if (e.Location.X >= InitConstant_X)
+                                {
+                                    Init_x = InitConstant_X;
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
+
                         if (e.InContact)
                         {
                             ((SKCanvasView)sender).InvalidateSurface();
                         }
                         break;
+
                     case SKTouchAction.Released:
                         timer_stop_PN = true;
                         parabolic_clear = false;
@@ -1112,13 +1167,20 @@ namespace ParbolicMotionGame.ViewModels
         {
             dis = (float)(Math.Pow(Init_x - default_Init_x, 2) + Math.Pow(Init_y - default_Init_y, 2));
             dis_init_circle = (float)Math.Sqrt(dis);
-
+            
             control_rcos = (Init_x - default_Init_x) / dis_init_circle;
             control_rsin = (Init_y - default_Init_y) / dis_init_circle;
-            control_rcos_abs = Math.Abs((Init_x - default_Init_x) / dis_init_circle); //각도 절대값 괜찮나?
-            control_rsin_abs = Math.Abs((Init_y - default_Init_y) / dis_init_circle); //각도 절대값 괜찮나?
-            Init_x = control_rcos * default_radius_move_allow + default_Init_x;
-            Init_y = control_rsin * default_radius_move_allow + default_Init_y;
+            
+            if (dis_init_circle >= default_radius_move_allow)
+            {
+                Init_x = control_rcos * default_radius_move_allow + default_Init_x;
+                Init_y = control_rsin * default_radius_move_allow + default_Init_y;
+            }
+            //control_rcos_abs = Math.Abs((Init_x - default_Init_x) / dis_init_circle); //각도 절대값 괜찮나?
+            //control_rsin_abs = Math.Abs((Init_y - default_Init_y) / dis_init_circle); //각도 절대값 괜찮나?
+            control_rcos_abs = ((default_Init_x - Init_x) / dis_init_circle);
+            control_rsin_abs = ((Init_y - default_Init_y) / dis_init_circle);
+
         }
         private void Init_Location_set_sub(int LEVEL, SKImageInfo info)
         {
@@ -1224,6 +1286,8 @@ namespace ParbolicMotionGame.ViewModels
                 Game_level = 1;
                 SKCanvas canvas = surface.Canvas;
                 canvas.Clear();
+                Game_Btn_Visible = true;
+                Game_Btn_Enable = true;
                 Gameover_textdraw(sender, surface, info);
             }
             else
@@ -1241,8 +1305,6 @@ namespace ParbolicMotionGame.ViewModels
             SKCanvas canvas = surface.Canvas; //그래픽그리기 컨텍스트
                                               //개체는 그래픽 SKCanvan 변환과 클리핑을 포함 하는 그래픽 상태를 캡슐화 합니다.
 
-            Game_Btn_Visible = true;
-            Game_Btn_Enable = true;
             canvas.Save();
             SKPaint textPaint = new SKPaint
             {

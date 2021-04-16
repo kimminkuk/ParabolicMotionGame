@@ -43,6 +43,7 @@ namespace ParbolicMotionGame
         private void CanvasView_Touch(object sender, SKTouchEventArgs e)
         {
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
+            
             canvasView1.TouchMotion(sender, e);
         }
 
