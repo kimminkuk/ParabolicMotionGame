@@ -105,6 +105,7 @@ namespace ParbolicMotionGame.ViewModels
                 {
                     GameClearText(sender, surface, info);
                 }
+                GameLevelTextCanvas(Game_level, sender, surface, info);
                 /*
                  * Main Canvas Paint Collection
                  * Ball, Init Ball, Restrict Bound, Goal Block 
@@ -287,6 +288,39 @@ namespace ParbolicMotionGame.ViewModels
                 PaintSurface_sub(sender, surface, info);
                 
             }
+        }
+
+        private void GameLevelTextCanvas(int game_level, object sender, SKSurface surface, SKImageInfo info)
+        {
+            //SKImageInfo info = e.Info; //그리기 화면에 대한 정보 (너비, 높이 픽셀)
+            //SKSurface surface = e.Surface; // 그리기 화면 자체
+            SKCanvas canvas = surface.Canvas; //그래픽그리기 컨텍스트
+                                              //개체는 그래픽 SKCanvan 변환과 클리핑을 포함 하는 그래픽 상태를 캡슐화 합니다.
+
+            SKPaint textPaint = new SKPaint
+            {
+                Style = SKPaintStyle.Fill,
+                Color = Color.Black.ToSKColor(),
+                FakeBoldText = true,
+                StrokeWidth = 1
+            };
+
+            string game_over_text = "LEVEL"+game_level;
+
+            //Adjust TextSize property so text is 95% of screen width
+            float textWidth = textPaint.MeasureText(game_over_text);
+            textPaint.TextSize = 0.1f * info.Width * textPaint.TextSize / textWidth;
+
+            //Find the text bounds
+            SKRect textBounds = new SKRect();
+            textPaint.MeasureText(game_over_text, ref textBounds);
+
+            // Calculate offsets to center the text on the screen
+            float xText = (float)0.1*info.Width;
+            float yText = (float)0.1 * info.Height;
+
+            //And draw the text
+            canvas.DrawText(game_over_text, xText, yText, textPaint);
         }
 
         private void GameClearText(object sender, SKSurface surface, SKImageInfo info)
@@ -1024,16 +1058,16 @@ namespace ParbolicMotionGame.ViewModels
                     break;
                 case 4:
                     //LEVEL4 Init Location Constant
-                    InitConstant_X = (float)(info.Width * 0.075);
+                    InitConstant_X = (float)(info.Width * 0.2);
                     InitConstant_Y = (float)(info.Height * 0.5);
                     default_radius_move_allow = (float)(info.Width * 0.07);
-                    default_Init_x = (float)(info.Width * 0.075);
+                    default_Init_x = (float)(info.Width * 0.2);
                     default_Init_y = (float)(info.Height * 0.5);
 
                     //LEVEL4 Init Ball Position
                     if (drag_onoff)
                     {
-                        Init_x = (float)(info.Width * 0.075);
+                        Init_x = (float)(info.Width * 0.2);
                         Init_y = (float)(info.Height * 0.5);
 
                         //Init rect_pn (2x1)
@@ -1048,16 +1082,16 @@ namespace ParbolicMotionGame.ViewModels
                     break;
                 case 5:
                     //LEVEL5 Init Location Constant
-                    InitConstant_X = (float)(info.Width * 0.075);
+                    InitConstant_X = (float)(info.Width * 0.2);
                     InitConstant_Y = (float)(info.Height * 0.6);
                     default_radius_move_allow = (float)(info.Width * 0.07);
-                    default_Init_x = (float)(info.Width * 0.075);
+                    default_Init_x = (float)(info.Width * 0.2);
                     default_Init_y = (float)(info.Height * 0.6);
 
                     //LEVEL5 Init Ball Position
                     if (drag_onoff)
                     {
-                        Init_x = (float)(info.Width * 0.075);
+                        Init_x = (float)(info.Width * 0.2);
                         Init_y = (float)(info.Height * 0.6);
 
                         //Init rect_pn (1x1)
@@ -1188,6 +1222,8 @@ namespace ParbolicMotionGame.ViewModels
             {
                 Game_score = 0;
                 Game_level = 1;
+                SKCanvas canvas = surface.Canvas;
+                canvas.Clear();
                 Gameover_textdraw(sender, surface, info);
             }
             else
@@ -1205,6 +1241,8 @@ namespace ParbolicMotionGame.ViewModels
             SKCanvas canvas = surface.Canvas; //그래픽그리기 컨텍스트
                                               //개체는 그래픽 SKCanvan 변환과 클리핑을 포함 하는 그래픽 상태를 캡슐화 합니다.
 
+            Game_Btn_Visible = true;
+            Game_Btn_Enable = true;
             canvas.Save();
             SKPaint textPaint = new SKPaint
             {
@@ -1231,7 +1269,6 @@ namespace ParbolicMotionGame.ViewModels
             //And draw the text
             canvas.DrawText(game_over_text, xText, yText, textPaint);
             canvas.Restore();
-
             Game_Btn_Visible = true;
             Game_Btn_Enable = true;
         }
