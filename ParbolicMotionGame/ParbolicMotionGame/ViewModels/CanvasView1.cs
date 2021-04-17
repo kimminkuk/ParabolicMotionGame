@@ -58,6 +58,12 @@ namespace ParbolicMotionGame.ViewModels
         public int[] wall_pn_Level4_sub = new int[2];
         public bool TouchOnOff = true;
 
+        SKPaint paint = new SKPaint();
+        SKPaint paint_restrictcircle = new SKPaint();
+        SKPaint paintInitBall = new SKPaint();
+        SKPaint paint_GoalBlock = new SKPaint();
+        SKPaint paint_PredictArrow = new SKPaint();
+
         //Binding Text
         int game_power = 0;
         int game_level = 0;
@@ -85,6 +91,9 @@ namespace ParbolicMotionGame.ViewModels
             Game_Btn_Visible = false;
             game_Btn_Enable = false;
             game_touch_enable = true;
+
+            Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock, paint_PredictArrow);
+
         }
 
         public void PaintSurface_main(object sender, SKSurface surface, SKImageInfo info)
@@ -113,12 +122,12 @@ namespace ParbolicMotionGame.ViewModels
                  * Main Canvas Paint Collection
                  * Ball, Init Ball, Restrict Bound, Goal Block, paint_PredictArrow 
                  */
-                SKPaint paint = new SKPaint();
-                SKPaint paint_restrictcircle = new SKPaint();
-                SKPaint paintInitBall = new SKPaint();
-                SKPaint paint_GoalBlock = new SKPaint();
-                SKPaint paint_PredictArrow = new SKPaint();
-                Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock, paint_PredictArrow);
+//                SKPaint paint = new SKPaint();
+//                SKPaint paint_restrictcircle = new SKPaint();
+//                SKPaint paintInitBall = new SKPaint();
+//                SKPaint paint_GoalBlock = new SKPaint();
+//                SKPaint paint_PredictArrow = new SKPaint();
+//                Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock, paint_PredictArrow);
 
                 //Switch Case.. Level 1,Level2...Level5
                 /*
@@ -164,7 +173,7 @@ namespace ParbolicMotionGame.ViewModels
                 /*
                  * Start Direction Prediction Arrow Graphics
                  */
-                PredictArrowDirection(canvas,paint_PredictArrow);
+                PredictArrowDirection(canvas, info, paint_PredictArrow);
 
                 //TEST PARABOLIC MOTION
                 //int i_2 = 0;
@@ -305,21 +314,34 @@ namespace ParbolicMotionGame.ViewModels
             }
         }
 
-        private void PredictArrowDirection(SKCanvas canvas, SKPaint paint_PredictArrow)
+        private void PredictArrowDirection(SKCanvas canvas, SKImageInfo info, SKPaint paint_PredictArrow)
         {
             if (TouchOnOff)
             {
-                SKPoint[] PredictArrow = new SKPoint[4];
-                PredictArrow[0] = new SKPoint(Init_x, Init_y);
-                PredictArrow[1] = new SKPoint(Init_x + (Game_power / 3), Init_y - (Game_power / 3));
-                PredictArrow[2] = new SKPoint(Init_x - (Game_power / 20), Init_y - (Game_power / 3));
-                PredictArrow[3] = new SKPoint(Init_x + (Game_power / 3), Init_y + (Game_power / 20));
+                //SKPoint[] PredictArrow = new SKPoint[4];
+                //PredictArrow[0] = new SKPoint(Init_x, Init_y);
+                //PredictArrow[1] = new SKPoint(Init_x + (Game_power / 3), Init_y - (Game_power / 3));
+                //PredictArrow[2] = new SKPoint(Init_x - (Game_power / 20), Init_y - (Game_power / 3));
+                //PredictArrow[3] = new SKPoint(Init_x + (Game_power / 3), Init_y + (Game_power / 20));
+                //
+                //paint_PredictArrow.StrokeWidth = Game_power / 60;
+                //
+                //canvas.DrawLine(PredictArrow[0], PredictArrow[1], paint_PredictArrow);
+                //canvas.DrawLine(PredictArrow[1], PredictArrow[2], paint_PredictArrow);
+                //canvas.DrawLine(PredictArrow[1], PredictArrow[3], paint_PredictArrow);
 
-                paint_PredictArrow.StrokeWidth = Game_power / 60;
+                //paintInitBall, 예측 공 Paint
+                for (int i = 1; i < 15; i++)
+                {
+                    float Predict_t = 0.125f * i;
+                    float Predict_g = 5 * Predict_t;
+                    float Predict_x = (float)(Game_power * control_rcos_abs) * Predict_t + Init_x;
+                    float Predict_y = ((float)(Game_power * control_rsin_abs) * Predict_t - Predict_g * Predict_t * 4);
+                    Predict_y = Init_y - Predict_y;
 
-                canvas.DrawLine(PredictArrow[0], PredictArrow[1], paint_PredictArrow);
-                canvas.DrawLine(PredictArrow[1], PredictArrow[2], paint_PredictArrow);
-                canvas.DrawLine(PredictArrow[1], PredictArrow[3], paint_PredictArrow);
+                    canvas.DrawCircle(Predict_x, Predict_y, 
+                        (float)(0.01-0.0005*i) * info.Width , paint);
+                }
             }
         }
 
