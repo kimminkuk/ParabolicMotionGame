@@ -30,13 +30,11 @@ namespace ParbolicMotionGame
         {
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
             canvasView1.PaintSurface_main(sender, e.Surface, e.Info);
-            //new CanvasView1().PaintSurface_main(e.Surface, e.Info);
         }
 
         private void CanvasView_PaintSurface2(object sender, SKPaintSurfaceEventArgs e)
         {
-            //CanvasView1 canvasView2 = (CanvasView1)BindingContext;
-            //canvasView2.PaintSurface_sub(sender, e.Surface, e.Info);
+
         }
 
         //Game Start
@@ -64,6 +62,30 @@ namespace ParbolicMotionGame
 
             CanvasView1_Invalidate();
         }
+        private void OnTapGestureRecognizerTapped(object sender, EventArgs e)
+        {
+            CanvasView1 canvasView1 = (CanvasView1)BindingContext;
+            canvasView1.OnTapGestureRecognizerTapped_GameReset(sender, e);
+            CanvasView1_Invalidate();
+        }
+
+        private void Button_Clicked_LevelUp(object sender, EventArgs e)
+        {
+            CanvasView1 canvasView1 = (CanvasView1)BindingContext;
+            canvasView1.Debug_GameLevelUp(sender, e, gamecontinue_btn);
+
+            CanvasView1_Invalidate();
+        }
+
+
+        private void Button_Clicked_LevelDown(object sender, EventArgs e)
+        {
+            CanvasView1 canvasView1 = (CanvasView1)BindingContext;
+            canvasView1.Debug_GameLevelDown(sender, e, gamecontinue_btn);
+
+            CanvasView1_Invalidate();
+        }
+
 
         public void Button_View(bool onoff)
         {

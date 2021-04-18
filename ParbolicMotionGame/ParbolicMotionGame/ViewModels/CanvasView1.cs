@@ -57,6 +57,8 @@ namespace ParbolicMotionGame.ViewModels
         public int[] wall_pn_Level4_main = new int[2];
         public int[] wall_pn_Level4_sub = new int[2];
         public bool TouchOnOff = true;
+        public float[] LEVEL_4_Wall_y_pos_main = new float[2] { 0.1f, 0.8f };
+        public float[] LEVEL_4_Wall_y_pos_sub = new float[2] { 0.15f, 0.9f };
 
         SKPaint paint = new SKPaint();
         SKPaint paint_restrictcircle = new SKPaint();
@@ -72,6 +74,10 @@ namespace ParbolicMotionGame.ViewModels
         bool game_Btn_Visible = false;
         bool game_Btn_Enable = false;
         bool game_touch_enable = true;
+        bool gameDebugLevelUp_Visble = false; //Debug -> true
+        bool gameDebugLevelDown_Visble = false;
+        bool gameDebugLevelUp_Enable = false;
+        bool gameDebugLevelDown_Enable = false;
         public int Game_power { get => game_power; set { game_power = value; NotifyPropertyChanged("Game_power"); } }
         public int Game_level { get => game_level; set { game_level = value; NotifyPropertyChanged("Game_level"); } }
         public int Game_score { get => game_score; set { game_score = value; NotifyPropertyChanged("Game_score"); } }
@@ -79,6 +85,12 @@ namespace ParbolicMotionGame.ViewModels
         public bool Game_Btn_Visible { get => game_Btn_Visible; set { game_Btn_Visible = value; NotifyPropertyChanged("Game_Btn_Visible"); } }
         public bool Game_Btn_Enable { get => game_Btn_Enable; set { game_Btn_Enable = value; NotifyPropertyChanged("Game_Btn_Enable"); } }
         public bool Game_touch_enable { get => game_touch_enable; set { game_Btn_Enable = value; NotifyPropertyChanged("Game_touch_enable"); } }
+
+        public bool GameDebugLevelUp_Enable { get => gameDebugLevelUp_Enable; set { gameDebugLevelUp_Enable = value; NotifyPropertyChanged("GameDebugLevelUp_Enable"); } }
+        public bool GameDebugLevelUp_Visble { get => gameDebugLevelUp_Visble; set { gameDebugLevelUp_Visble = value; NotifyPropertyChanged("GameDebugLevelUp_Visble"); } }
+        public bool GameDebugLevelDown_Enable { get => gameDebugLevelDown_Enable; set { gameDebugLevelDown_Enable = value; NotifyPropertyChanged("GameDebugLevelDown_Enable"); } }
+        public bool GameDebugLevelDown_Visble { get => gameDebugLevelDown_Visble; set { gameDebugLevelDown_Visble = value; NotifyPropertyChanged("GameDebugLevelDown_Visble"); } }
+
 
         System.Threading.Timer timer_;
 
@@ -89,7 +101,8 @@ namespace ParbolicMotionGame.ViewModels
             Game_score = 0;
             Game_rad = 0;
             Game_Btn_Visible = false;
-            game_Btn_Enable = false;
+            //game_Btn_Enable = false;
+            game_Btn_Enable = true;
             game_touch_enable = true;
 
             Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock, paint_PredictArrow);
@@ -104,6 +117,7 @@ namespace ParbolicMotionGame.ViewModels
             if (game_over)
             {
                 canvas.Clear();
+                EndWaitTime(1000);
                 Game_Btn_Visible = true;
                 Game_Btn_Enable = true;
                 Gameover_textdraw(sender, surface, info);
@@ -237,7 +251,7 @@ namespace ParbolicMotionGame.ViewModels
                             }
                             if (wall_pn_sub[3] != true && x >= (float)0.75 * info.Width &&
                                 x <= (float)0.755 * info.Width && y >= (float)0.15 * info.Height
-                                && y <= (float)0.5 * info.Height)
+                                && y <= (float)0.6 * info.Height)
                             {
                                 wall_pn_sub[3] = true;
                                 wall_pn[3] = false;
@@ -247,7 +261,7 @@ namespace ParbolicMotionGame.ViewModels
                                 x = (float)0.75 * info.Width + ((float)0.75 * info.Width - x);
 
                                 if( wall_pn_Level4_main[1] != 1 && x >= (float)0.6 * info.Width && x <= (float)0.605 * info.Width 
-                                    && y >= (float)0.1 * info.Height && y <= (float)0.4 * info.Height )
+                                    && y >= (float)0.1 * info.Height && y <= (float)0.55 * info.Height )
                                 {
                                     wall_pn_Level4_main[1] = 1;
                                 }
@@ -257,19 +271,15 @@ namespace ParbolicMotionGame.ViewModels
                             // A<-->B , A와B 벽사이의 거리 *2 만큼 x위치에서 빼준다.
                             if (wall_pn_Level4_main[1] == 1)
                             {
-                                x = x - 2 * ((float)0.75 * info.Width - (float)0.6 * info.Width);
+                                x = (float)(Vo_test * control_rcos_abs) * t + Init_x - 0.3f * info.Width;
                                 wall_pn_sub[3] = false;
 
-                                if( x < (float)0.75 * info.Width)
-                                {
-                                    //continue하면 공이 0.1초정도 사라진다.. 이러면 별로야
-                                    x = x - 2 * ((float)0.75 * info.Width - (float)0.6 * info.Width);
-                                }
                                 if (x >= (float)0.75 * info.Width &&x <= (float)0.755 * info.Width 
-                                    && y >= (float)0.15 * info.Height && y <= (float)0.5 * info.Height)
+                                    && y >= (float)0.15 * info.Height && y <= (float)0.6 * info.Height)
                                 {
                                     wall_pn_sub[3] = true;
                                     wall_pn[3] = false;
+                                    wall_pn_Level4_main[1] = 0;
                                 }
                                 
                             }
@@ -475,7 +485,7 @@ namespace ParbolicMotionGame.ViewModels
                 case 4:
                     if (wall_pn[3] != true && x >= (float)0.6 * info.Width &&
                         x <= (float)0.605 * info.Width && y >= (float)0.1 * info.Height
-                        && y <= (float)0.4 * info.Height)
+                        && y <= (float)0.55 * info.Height)
                     {
                         wall_pn[3] = true;
                     }
@@ -925,23 +935,27 @@ namespace ParbolicMotionGame.ViewModels
                     canvas.DrawLine(DefenceWallLevel_3[0], DefenceWallLevel_3[3], paintDefenceWallLevel_3);
                     break;
                 case 4:
+                    //LEVEL_4_Wall_y_pos_sub[1] = 0.1f;
+                    //LEVEL_4_Wall_y_pos_sub[2] = 0.9f;
                     SKPoint[] DefenceWallLevel_4 = new SKPoint[4];
                     DefenceWallLevel_4[0] = new SKPoint((float)0.6 * info.Width,  (float)0.1 * info.Height);
-                    DefenceWallLevel_4[1] = new SKPoint((float)0.6 * info.Width,  (float)0.4 * info.Height);
-                    DefenceWallLevel_4[2] = new SKPoint((float)0.75 * info.Width, (float)0.15 * info.Height);
-                    DefenceWallLevel_4[3] = new SKPoint((float)0.75 * info.Width, (float)0.5 * info.Height);
+                    DefenceWallLevel_4[1] = new SKPoint((float)0.6 * info.Width,  (float)0.55* info.Height);
+                    //DefenceWallLevel_4[2] = new SKPoint((float)0.75 * info.Width, LEVEL_4_Wall_y_pos_sub[1] * info.Height);
+                    //DefenceWallLevel_4[3] = new SKPoint((float)0.75 * info.Width, LEVEL_4_Wall_y_pos_sub[2] * info.Height);
+                    DefenceWallLevel_4[2] = new SKPoint((float)0.75 * info.Width, 0.15f * info.Height);
+                    DefenceWallLevel_4[3] = new SKPoint((float)0.75 * info.Width, 0.6f * info.Height);
 
                     SKPaint paintDefenceWallLevel_4 = new SKPaint
                     {
                         Style = SKPaintStyle.Fill,
                         Color = Color.Purple.ToSKColor(),
-                        StrokeWidth = (float)(info.Width * 0.005)
+                        StrokeWidth = (float)(info.Width * 0.01)
                     };
                     SKPaint paintDefenceWallLevel_4_sub = new SKPaint
                     {
                         Style = SKPaintStyle.Fill,
                         Color = Color.Purple.ToSKColor(),
-                        StrokeWidth = (float)(info.Width * 0.005)
+                        StrokeWidth = (float)(info.Width * 0.01)
                     };
 
                     canvas.DrawLine(DefenceWallLevel_4[0], DefenceWallLevel_4[1], paintDefenceWallLevel_4);
@@ -1308,8 +1322,11 @@ namespace ParbolicMotionGame.ViewModels
                 Game_level = 1;
                 SKCanvas canvas = surface.Canvas;
                 canvas.Clear();
+
+                EndWaitTime(1000); // Add for End Btn Image 
                 Game_Btn_Visible = true;
                 Game_Btn_Enable = true;
+                EndWaitTime(1000); // Add for End Btn Image
                 Gameover_textdraw(sender, surface, info);
             }
             else
@@ -1359,6 +1376,8 @@ namespace ParbolicMotionGame.ViewModels
 
         public void BTN_game_continue(object sender, EventArgs e, Button gamecontinue_btn)
         {
+            //Add for Operation Safety
+            EndWaitTime(1000);
             parabolic_cnt = 0;
             game_over = false;
 
@@ -1378,7 +1397,89 @@ namespace ParbolicMotionGame.ViewModels
             Game_power = 0;
             Game_rad = 0;
             Game_Btn_Visible = false;
-            Game_Btn_Enable = false;
+            //Game_Btn_Enable = false;
+            Game_Btn_Enable = true;
+        }
+        public void OnTapGestureRecognizerTapped_GameReset(object sender, EventArgs e)
+        {
+            //Add for Operation Safety
+            EndWaitTime(1000);
+            parabolic_cnt = 0;
+            game_over = false;
+
+            timer_stop_PN = false;
+            drag_onoff = true; //Initial x,y 
+            Init_x = 0;
+            Init_y = 0;
+
+            //Init rect_pn
+            for (int j = 0; j < 16; j++)
+            {
+                rect_pn[j] = true;
+            }
+
+            Game_score = 0;
+            Game_level = 1;
+            Game_power = 0;
+            Game_rad = 0;
+            Game_Btn_Visible = false;
+            Game_Btn_Enable = true;
+        }
+
+        public void Debug_GameLevelUp(object sender, EventArgs e, Button gamecontinue_btn)
+        {
+            //Add for Operation Safety
+            EndWaitTime(1000);
+            Game_level++;
+
+            parabolic_cnt = 0;
+            game_over = false;
+
+            timer_stop_PN = false;
+            drag_onoff = true; //Initial x,y 
+            Init_x = 0;
+            Init_y = 0;
+
+            //Init rect_pn
+            for (int j = 0; j < 16; j++)
+            {
+                rect_pn[j] = true;
+            }
+
+            //Game_score = 0;
+            //Game_level = 1;
+            //Game_power = 0;
+            //Game_rad = 0;
+            Game_Btn_Visible = false;
+            //Game_Btn_Enable = false;
+            Game_Btn_Enable = true;
+        }
+        public void Debug_GameLevelDown(object sender, EventArgs e, Button gamecontinue_btn)
+        {
+            //Add for Operation Safety
+            EndWaitTime(1000);
+            Game_level--;
+            parabolic_cnt = 0;
+            game_over = false;
+
+            timer_stop_PN = false;
+            drag_onoff = true; //Initial x,y 
+            Init_x = 0;
+            Init_y = 0;
+
+            //Init rect_pn
+            for (int j = 0; j < 16; j++)
+            {
+                rect_pn[j] = true;
+            }
+
+            //Game_score = 0;
+            //Game_level = 1;
+            //Game_power = 0;
+            //Game_rad = 0;
+            Game_Btn_Visible = false;
+            //Game_Btn_Enable = false;
+            Game_Btn_Enable = true;
         }
         private void StartTimer_BlockRotation()
         {
@@ -1414,6 +1515,10 @@ namespace ParbolicMotionGame.ViewModels
                     BlockRotationCnt++;
                 }
             });
+        }
+        private async void EndWaitTime(int WaitTime)
+        {
+            await Task.Delay(WaitTime);
         }
         private void timer_stop()
         {
