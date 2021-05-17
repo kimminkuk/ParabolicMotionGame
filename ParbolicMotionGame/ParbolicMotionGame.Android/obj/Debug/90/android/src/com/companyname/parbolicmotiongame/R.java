@@ -4896,10 +4896,11 @@ public final class R {
     public static final int toolbar=0x7f0b0046;
   }
   public static final class mipmap {
-    public static final int icon=0x7f0c0000;
-    public static final int icon_round=0x7f0c0001;
-    public static final int launcher_foreground=0x7f0c0002;
-    public static final int parabolic_icon=0x7f0c0003;
+    public static final int ic_autorenew=0x7f0c0000;
+    public static final int icon=0x7f0c0001;
+    public static final int icon_round=0x7f0c0002;
+    public static final int launcher_foreground=0x7f0c0003;
+    public static final int parabolic_icon=0x7f0c0004;
   }
   public static final class string {
     public static final int abc_action_bar_home_description=0x7f0d0000;

@@ -508,3 +508,5 @@ C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotion
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.Android\obj\Debug\90\lp\41\jl\files.cache
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.Android\obj\Debug\90\lp\42\jl\files.cache
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.Android\obj\Debug\90\res\mipmap-hdpi\parabolic_icon.png
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.Android\obj\Debug\90\android\assets\Newtonsoft.Json.dll
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.Android\obj\Debug\90\res\mipmap-hdpi\ic_autorenew.png

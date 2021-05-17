@@ -12,3 +12,4 @@ C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotion
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\bin\Debug\netstandard2.0\ref\ParbolicMotionGame.dll
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\bin\Debug\netstandard2.0\ParbolicMotionGame.pdb
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\XamlC.stamp
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Debug\netstandard2.0\GameBoardPage.xaml.g.cs

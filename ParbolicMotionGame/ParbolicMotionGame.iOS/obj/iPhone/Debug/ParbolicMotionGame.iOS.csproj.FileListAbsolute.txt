@@ -59,3 +59,5 @@ C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotion
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.iOS\obj\iPhone\Debug\ParbolicMotionGame.iOS.csproj.CopyComplete
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.iOS\obj\iPhone\Debug\ParbolicMotionGame.iOS.exe
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.iOS\obj\iPhone\Debug\ParbolicMotionGame.iOS.pdb
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.iOS\bin\iPhone\Debug\System.Data.SqlClient.dll
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame.iOS\bin\iPhone\Debug\Newtonsoft.Json.dll

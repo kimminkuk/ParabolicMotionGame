@@ -12,16 +12,21 @@ using SkiaSharp.Views.Forms;
 using Xamarin.Forms.Shapes;
 
 using ParbolicMotionGame.ViewModels;
+using ParbolicMotionGame.Data;
+using System.Collections.ObjectModel;
 
 namespace ParbolicMotionGame
 {
     public partial class MainPage : ContentPage
     {
+        readonly ParabolicDBManager parabolicDBManager = new ParabolicDBManager();
+        IList<ParabolicDB> parabolicDBs = new ObservableCollection<ParabolicDB>();
+        ParabolicDB parabolicDB = new ParabolicDB();
+
         public MainPage()
         {
             InitializeComponent();
             BindingContext = new CanvasView1();
-            
             CanvasView2.InvalidateSurface();
             CanvasView.InvalidateSurface();
         }
@@ -55,17 +60,27 @@ namespace ParbolicMotionGame
             CanvasView2.InvalidateSurface();
         }
 
-        private void Button_Clicked(object sender, EventArgs e)
+        async public void Button_Clicked(object sender, EventArgs e)
         {
+            
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
-            canvasView1.BTN_game_continue(sender, e, gamecontinue_btn);
+            bool answer = await DisplayAlert("Question?", "Would you save Record?", "Yes", "No");
+            string Name_ = "";
 
+            canvasView1.BTN_game_continue(sender, e, gamecontinue_btn, answer, ref parabolicDB);
+            if(answer)
+              await Navigation.PushModalAsync(new AddGameDBPage(parabolicDBManager, parabolicDBs, parabolicDB));
             CanvasView1_Invalidate();
         }
-        private void OnTapGestureRecognizerTapped(object sender, EventArgs e)
+
+        async private void OnTapGestureRecognizerTapped(object sender, EventArgs e)
         {
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
-            canvasView1.OnTapGestureRecognizerTapped_GameReset(sender, e);
+            bool answer = await DisplayAlert("Question?", "Would you save Record?", "Yes", "No");
+            canvasView1.OnTapGestureRecognizerTapped_GameReset(sender, e, ref parabolicDB);
+
+            if (answer)
+                await Navigation.PushModalAsync(new AddGameDBPage(parabolicDBManager, parabolicDBs, parabolicDB));
             CanvasView1_Invalidate();
         }
 

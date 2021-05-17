@@ -11,6 +11,9 @@ using Xamarin.Forms;
 using Xamarin.Forms.Shapes;
 
 using ParbolicMotionGame;
+using System.Data.SqlClient;
+using ParbolicMotionGame.Data;
+using System.Collections.ObjectModel;
 
 namespace ParbolicMotionGame.ViewModels
 {
@@ -91,7 +94,9 @@ namespace ParbolicMotionGame.ViewModels
         public bool GameDebugLevelDown_Enable { get => gameDebugLevelDown_Enable; set { gameDebugLevelDown_Enable = value; NotifyPropertyChanged("GameDebugLevelDown_Enable"); } }
         public bool GameDebugLevelDown_Visble { get => gameDebugLevelDown_Visble; set { gameDebugLevelDown_Visble = value; NotifyPropertyChanged("GameDebugLevelDown_Visble"); } }
 
-
+        /*
+         *  Timer
+         */
         System.Threading.Timer timer_;
 
         public CanvasView1()
@@ -102,7 +107,7 @@ namespace ParbolicMotionGame.ViewModels
             Game_rad = 0;
             Game_Btn_Visible = false;
             //game_Btn_Enable = false;
-            game_Btn_Enable = true;
+            game_Btn_Enable = false;
             game_touch_enable = true;
 
             Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock, paint_PredictArrow);
@@ -118,8 +123,8 @@ namespace ParbolicMotionGame.ViewModels
             {
                 canvas.Clear();
                 EndWaitTime(1000);
-                Game_Btn_Visible = true;
-                Game_Btn_Enable = true;
+                Game_Btn_Visible = false;
+                Game_Btn_Enable = false;
                 Gameover_textdraw(sender, surface, info);
                 return;
             }
@@ -328,18 +333,6 @@ namespace ParbolicMotionGame.ViewModels
         {
             if (TouchOnOff)
             {
-                //SKPoint[] PredictArrow = new SKPoint[4];
-                //PredictArrow[0] = new SKPoint(Init_x, Init_y);
-                //PredictArrow[1] = new SKPoint(Init_x + (Game_power / 3), Init_y - (Game_power / 3));
-                //PredictArrow[2] = new SKPoint(Init_x - (Game_power / 20), Init_y - (Game_power / 3));
-                //PredictArrow[3] = new SKPoint(Init_x + (Game_power / 3), Init_y + (Game_power / 20));
-                //
-                //paint_PredictArrow.StrokeWidth = Game_power / 60;
-                //
-                //canvas.DrawLine(PredictArrow[0], PredictArrow[1], paint_PredictArrow);
-                //canvas.DrawLine(PredictArrow[1], PredictArrow[2], paint_PredictArrow);
-                //canvas.DrawLine(PredictArrow[1], PredictArrow[3], paint_PredictArrow);
-
                 //paintInitBall, 예측 공 Paint
                 for (int i = 1; i < 15; i++)
                 {
@@ -540,7 +533,6 @@ namespace ParbolicMotionGame.ViewModels
             paint_PredictArrow.IsAntialias = true;
             paint_PredictArrow.Style = SKPaintStyle.StrokeAndFill;
             paint_PredictArrow.Color = Color.Red.ToSKColor();
-            //paint_PredictArrow.StrokeWidth = Game_power / 70;
         }
 
         private void GoalBlockDamageCount(int LEVEL, float x, float y, SKImageInfo info)
@@ -653,8 +645,8 @@ namespace ParbolicMotionGame.ViewModels
             {
                 //canvas.Clear();
                 //Gameover_textdraw(sender, surface, info);
-                Game_Btn_Visible = true;
-                Game_Btn_Enable = true;
+                Game_Btn_Visible = false;
+                Game_Btn_Enable = false;
                 return;
             }
             else
@@ -687,10 +679,7 @@ namespace ParbolicMotionGame.ViewModels
                         if (rect_pn[i])
                             canvas.DrawRect(rect[i], paintGoalBlock);
                         else //Rotation Block or Delete Block
-                             //if (!rect_pn[i]) //Goal Block Destroy case
                         {
-                            //Thread?
-                            //StartTimer_BlockRotation();
                             timer_stop_PN_BlockRotation = true;
 
                             float rotation_x = (rect_point[i % 4] + rect_point[(i % 4) + 1]) / 2;
@@ -935,13 +924,9 @@ namespace ParbolicMotionGame.ViewModels
                     canvas.DrawLine(DefenceWallLevel_3[0], DefenceWallLevel_3[3], paintDefenceWallLevel_3);
                     break;
                 case 4:
-                    //LEVEL_4_Wall_y_pos_sub[1] = 0.1f;
-                    //LEVEL_4_Wall_y_pos_sub[2] = 0.9f;
                     SKPoint[] DefenceWallLevel_4 = new SKPoint[4];
                     DefenceWallLevel_4[0] = new SKPoint((float)0.6 * info.Width,  (float)0.1 * info.Height);
                     DefenceWallLevel_4[1] = new SKPoint((float)0.6 * info.Width,  (float)0.55* info.Height);
-                    //DefenceWallLevel_4[2] = new SKPoint((float)0.75 * info.Width, LEVEL_4_Wall_y_pos_sub[1] * info.Height);
-                    //DefenceWallLevel_4[3] = new SKPoint((float)0.75 * info.Width, LEVEL_4_Wall_y_pos_sub[2] * info.Height);
                     DefenceWallLevel_4[2] = new SKPoint((float)0.75 * info.Width, 0.15f * info.Height);
                     DefenceWallLevel_4[3] = new SKPoint((float)0.75 * info.Width, 0.6f * info.Height);
 
@@ -1318,16 +1303,14 @@ namespace ParbolicMotionGame.ViewModels
 
             if (game_over)
             {
-                Game_score = 0;
-                Game_level = 1;
                 SKCanvas canvas = surface.Canvas;
                 canvas.Clear();
 
                 EndWaitTime(1000); // Add for End Btn Image 
-                Game_Btn_Visible = true;
-                Game_Btn_Enable = true;
+                Game_Btn_Visible = false;
+                Game_Btn_Enable = false;
                 EndWaitTime(1000); // Add for End Btn Image
-                Gameover_textdraw(sender, surface, info);
+                Gameover_textdraw(sender, surface, info);           
             }
             else
             {
@@ -1370,14 +1353,17 @@ namespace ParbolicMotionGame.ViewModels
             //And draw the text
             canvas.DrawText(game_over_text, xText, yText, textPaint);
             canvas.Restore();
-            Game_Btn_Visible = true;
-            Game_Btn_Enable = true;
+
+            EndWaitTime(1000);
+            Game_Btn_Visible = false;
+            Game_Btn_Enable = false;
         }
 
-        public void BTN_game_continue(object sender, EventArgs e, Button gamecontinue_btn)
+        public void BTN_game_continue(object sender, EventArgs e, Button gamecontinue_btn, bool answer_, ref ParabolicDB parabolics)
         {
             //Add for Operation Safety
             EndWaitTime(1000);
+
             parabolic_cnt = 0;
             game_over = false;
 
@@ -1391,19 +1377,21 @@ namespace ParbolicMotionGame.ViewModels
             {
                 rect_pn[j] = true;
             }
-
+            parabolics.LevelPrabolic_class = Game_level;
+            parabolics.ScoreParabolic_class = Game_score;
             Game_score = 0;
             Game_level = 1;
             Game_power = 0;
             Game_rad = 0;
             Game_Btn_Visible = false;
-            //Game_Btn_Enable = false;
             Game_Btn_Enable = true;
         }
-        public void OnTapGestureRecognizerTapped_GameReset(object sender, EventArgs e)
+
+        public void GameResetAndUpdateDB(object sender, bool answer_, ref ParabolicDB parabolics)
         {
             //Add for Operation Safety
             EndWaitTime(1000);
+
             parabolic_cnt = 0;
             game_over = false;
 
@@ -1417,7 +1405,36 @@ namespace ParbolicMotionGame.ViewModels
             {
                 rect_pn[j] = true;
             }
+            parabolics.LevelPrabolic_class = Game_level;
+            parabolics.ScoreParabolic_class = Game_score;
+            Game_score = 0;
+            Game_level = 1;
+            Game_power = 0;
+            Game_rad = 0;
+            Game_Btn_Visible = false;
+            Game_Btn_Enable = true;
+        }
 
+        public void OnTapGestureRecognizerTapped_GameReset(object sender, EventArgs e, ref ParabolicDB parabolics)
+        {
+            //Add for Operation Safety
+            EndWaitTime(2000);
+
+            parabolic_cnt = 0;
+            game_over = false;
+
+            timer_stop_PN = false;
+            drag_onoff = true; //Initial x,y 
+            Init_x = 0;
+            Init_y = 0;
+
+            //Init rect_pn
+            for (int j = 0; j < 16; j++)
+            {
+                rect_pn[j] = true;
+            }
+            parabolics.LevelPrabolic_class = Game_level;
+            parabolics.ScoreParabolic_class = Game_score;
             Game_score = 0;
             Game_level = 1;
             Game_power = 0;
@@ -1446,12 +1463,7 @@ namespace ParbolicMotionGame.ViewModels
                 rect_pn[j] = true;
             }
 
-            //Game_score = 0;
-            //Game_level = 1;
-            //Game_power = 0;
-            //Game_rad = 0;
             Game_Btn_Visible = false;
-            //Game_Btn_Enable = false;
             Game_Btn_Enable = true;
         }
         public void Debug_GameLevelDown(object sender, EventArgs e, Button gamecontinue_btn)
@@ -1473,12 +1485,7 @@ namespace ParbolicMotionGame.ViewModels
                 rect_pn[j] = true;
             }
 
-            //Game_score = 0;
-            //Game_level = 1;
-            //Game_power = 0;
-            //Game_rad = 0;
             Game_Btn_Visible = false;
-            //Game_Btn_Enable = false;
             Game_Btn_Enable = true;
         }
         private void StartTimer_BlockRotation()
