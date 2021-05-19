@@ -65,7 +65,6 @@ namespace ParbolicMotionGame
             
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
             bool answer = await DisplayAlert("Question?", "Would you save Record?", "Yes", "No");
-            string Name_ = "";
 
             canvasView1.BTN_game_continue(sender, e, gamecontinue_btn, answer, ref parabolicDB);
             if(answer)

@@ -40,7 +40,7 @@ namespace ParbolicMotionGame.ViewModels
         public float dis = 0;
         public float dis_init_circle = 0;
 
-        public int time_interval = 0;
+        public int time_interval = 5;
         public bool timer_stop_PN = false;
         public bool parabolic_clear = false;
         public int parabolic_cnt = 0;
@@ -62,6 +62,17 @@ namespace ParbolicMotionGame.ViewModels
         public bool TouchOnOff = true;
         public float[] LEVEL_4_Wall_y_pos_main = new float[2] { 0.1f, 0.8f };
         public float[] LEVEL_4_Wall_y_pos_sub = new float[2] { 0.15f, 0.9f };
+        public float[] x_rendering = new float[10000];
+        public float[] y_rendering = new float[10000];
+        int cnt_rendering = 0;
+        bool enable_rendering = false;
+        float x_renderingdrwa = 0f;
+        float y_renderingdrwa = 0f;
+        int cnt_defencewallrendering = 0;
+
+        float[] defencewall_1_x = new float[2] { 0.6f, 0.61f };
+        float[] defencewall_1_y = new float[2] { 0.2f, 0.8f };
+        float ballsize = 0.01f;
 
         SKPaint paint = new SKPaint();
         SKPaint paint_restrictcircle = new SKPaint();
@@ -77,7 +88,7 @@ namespace ParbolicMotionGame.ViewModels
         bool game_Btn_Visible = false;
         bool game_Btn_Enable = false;
         bool game_touch_enable = true;
-        bool gameDebugLevelUp_Visble = false; //Debug -> true
+        bool gameDebugLevelUp_Visble = false; //Debug -> true, default : false
         bool gameDebugLevelDown_Visble = false;
         bool gameDebugLevelUp_Enable = false;
         bool gameDebugLevelDown_Enable = false;
@@ -98,6 +109,7 @@ namespace ParbolicMotionGame.ViewModels
          *  Timer
          */
         System.Threading.Timer timer_;
+        System.Threading.Timer timer_wall;
 
         public CanvasView1()
         {
@@ -109,16 +121,15 @@ namespace ParbolicMotionGame.ViewModels
             //game_Btn_Enable = false;
             game_Btn_Enable = false;
             game_touch_enable = true;
-
+            DeviceTimer_Wall();
             Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock, paint_PredictArrow);
-
         }
 
         public void PaintSurface_main(object sender, SKSurface surface, SKImageInfo info)
         {
             SKCanvas canvas = surface.Canvas; //그래픽그리기 컨텍스트
                                               //개체는 그래픽 SKCanvan 변환과 클리핑을 포함 하는 그래픽 상태를 캡슐화 합니다.
-
+            
             if (game_over)
             {
                 canvas.Clear();
@@ -137,24 +148,18 @@ namespace ParbolicMotionGame.ViewModels
                     return;
                 }
                 GameLevelTextCanvas(Game_level, sender, surface, info);
-                /*
-                 * Main Canvas Paint Collection
-                 * Ball, Init Ball, Restrict Bound, Goal Block, paint_PredictArrow 
-                 */
-//                SKPaint paint = new SKPaint();
-//                SKPaint paint_restrictcircle = new SKPaint();
-//                SKPaint paintInitBall = new SKPaint();
-//                SKPaint paint_GoalBlock = new SKPaint();
-//                SKPaint paint_PredictArrow = new SKPaint();
-//                Paint_Collection(paint, paint_restrictcircle, paintInitBall, paint_GoalBlock, paint_PredictArrow);
 
-                //Switch Case.. Level 1,Level2...Level5
                 /*
                  * Game Level 1,2,3,4,5
                  * Switch - case ?
                  * rect position cal : GameLevel 1
                  */
                 GoalBlockRectPosition(info, canvas, paint_GoalBlock);
+
+                /*
+                 *  LEVEL 1~5 Wall Make
+                 */
+                DefenceWallMake(Game_level, canvas, info);
 
                 /*
                  * BALL: Start Position
@@ -178,7 +183,7 @@ namespace ParbolicMotionGame.ViewModels
                 // 공 날리기전에는 무조건 초기 원 설정 범위 내부에 들어오게 한다.
                 if (timer_stop_PN != true)
                 {
-                    canvas_initcircle.DrawCircle(Init_x, Init_y, (float)(info.Width * 0.01), paintInitBall);
+                    canvas_initcircle.DrawCircle(Init_x, Init_y, info.Width * ballsize, paintInitBall);
                 }
 
                 //TEST ACTION
@@ -190,143 +195,340 @@ namespace ParbolicMotionGame.ViewModels
                 Game_rad = (int)(control_rcos_abs * 100);
 
                 /*
-                 * Start Direction Prediction Arrow Graphics
+                 *  Start Direction Prediction Arrow Graphics
                  */
-                PredictArrowDirection(canvas, info, paint_PredictArrow);
-
-                //TEST PARABOLIC MOTION
-                //int i_2 = 0;
-                for (int i = parabolic_cnt - 1; i < parabolic_cnt; i++)
+                if (TouchOnOff)
                 {
-                    if (i == -1) continue;
-                    
-                    float t = (float)i / 80;
-                    float g = 5 * t;
-
-                    float x = (float)(Vo_test * control_rcos_abs) * t + Init_x;
-                    float y = ((float)(Vo_test * control_rsin_abs) * t - g * t * 4); //info.Height ( ex) 640 )
-                    //float y_Upside = 0;
-                    
-                    y = Init_y - y;
-
-                    //처음 천장 맞은 경우
-                    //한번 실행하면서 순간 Y좌표를 저장한다.
-                    if (!pos_y_ceiling_touch && y < 0)                    
+                    PredictArrowDirection(canvas, info, paint_PredictArrow);
+                }
+                else
+                {
+                   /*
+                    * x,y Position Pre-Calculate
+                    */
+                    if (!enable_rendering)
                     {
-                        pos_y_ceiling_touch = true;
+                        PredictPostionCalculate(canvas, info, Vo_test);
                     }
-
-                    //천장 맞으면 자유 낙하 운동 개념으로 떨어지게..
-                    if (pos_y_ceiling_touch)
+#if false
+                if (!TouchOnOff)
+                {
+                    //Add : for skcanvas stop and timer stop only use for (i)
+                    //timer_stop();
+                    for (int i = 0; i < info.Width * 2; i++)
                     {
-                        pos_y_ceiling_touchIncrease++;
-                        float t_y = (float)pos_y_ceiling_touchIncrease / 25;
-                        float g_y = 6 * t_y;
-                        y = t_y * g_y * 5;
-                    }
-                    /*
-                     * Ball Touch DefenceWall True or False
-                     */
-                    DefenceWallTouchJudge(Game_level, x, y, info);
+                        if (i == -1) continue;
 
-                    switch (Game_level)
-                    {
-                        case 1:
-                            if (wall_pn[0])
-                            {
-                                x = (float)0.6 * info.Width + ((float)0.6 * info.Width - x);
-                            }
-                            break;
-                        case 2:
-                            if (wall_pn[1])
-                            {
-                                x = (float)0.55 * info.Width + ((float)0.55 * info.Width - x);
-                            }
-                            break;
-                        case 3:
-                            if (wall_pn[2])
-                            {
-                                x = (float)xpos_mirror * info.Width + ((float)xpos_mirror * info.Width - x);
-                            }
-                            break;
-                        case 4:
-                            if (wall_pn[3])
-                            {
-                                x = (float)0.6 * info.Width + ((float)0.6 * info.Width - x);
-                            }
-                            if (wall_pn_sub[3] != true && x >= (float)0.75 * info.Width &&
-                                x <= (float)0.755 * info.Width && y >= (float)0.15 * info.Height
-                                && y <= (float)0.6 * info.Height)
-                            {
-                                wall_pn_sub[3] = true;
-                                wall_pn[3] = false;
-                            }
-                            if (wall_pn_sub[3])
-                            {
-                                x = (float)0.75 * info.Width + ((float)0.75 * info.Width - x);
+                        float t = (float)i / 80;
+                        float g = 5 * t;
 
-                                if( wall_pn_Level4_main[1] != 1 && x >= (float)0.6 * info.Width && x <= (float)0.605 * info.Width 
-                                    && y >= (float)0.1 * info.Height && y <= (float)0.55 * info.Height )
+                        float x = (float)(Vo_test * control_rcos_abs) * t + Init_x;
+                        float y = ((float)(Vo_test * control_rsin_abs) * t - g * t * 4); //info.Height ( ex) 640 )
+                                                                                         //float y_Upside = 0;
+
+                        y = Init_y - y;
+
+                        //처음 천장 맞은 경우
+                        //한번 실행하면서 순간 Y좌표를 저장한다.
+                        if (!pos_y_ceiling_touch && y < 0)
+                        {
+                            pos_y_ceiling_touch = true;
+                        }
+
+                        //천장 맞으면 자유 낙하 운동 개념으로 떨어지게..
+                        if (pos_y_ceiling_touch)
+                        {
+                            pos_y_ceiling_touchIncrease++;
+                            float t_y = (float)pos_y_ceiling_touchIncrease / 25;
+                            float g_y = 6 * t_y;
+                            y = t_y * g_y * 5;
+                        }
+                        /*
+                         * Ball Touch DefenceWall True or False
+                         */
+                        DefenceWallTouchJudge(Game_level, x, y, info);
+
+                        switch (Game_level)
+                        {
+                            case 1:
+                                if (wall_pn[0])
                                 {
-                                    wall_pn_Level4_main[1] = 1;
+                                    x = (float)0.6 * info.Width + ((float)0.6 * info.Width - x);
                                 }
-                            }
-                            //공이 A B 벽이 있을 경우,
-                            //B벽을 맞고 A벽을 맞을때 공의 위치 계산
-                            // A<-->B , A와B 벽사이의 거리 *2 만큼 x위치에서 빼준다.
-                            if (wall_pn_Level4_main[1] == 1)
-                            {
-                                x = (float)(Vo_test * control_rcos_abs) * t + Init_x - 0.3f * info.Width;
-                                wall_pn_sub[3] = false;
-
-                                if (x >= (float)0.75 * info.Width &&x <= (float)0.755 * info.Width 
-                                    && y >= (float)0.15 * info.Height && y <= (float)0.6 * info.Height)
+                                break;
+                            case 2:
+                                if (wall_pn[1])
+                                {
+                                    x = (float)0.55 * info.Width + ((float)0.55 * info.Width - x);
+                                }
+                                break;
+                            case 3:
+                                if (wall_pn[2])
+                                {
+                                    x = (float)xpos_mirror * info.Width + ((float)xpos_mirror * info.Width - x);
+                                }
+                                break;
+                            case 4:
+                                if (wall_pn[3])
+                                {
+                                    x = (float)0.6 * info.Width + ((float)0.6 * info.Width - x);
+                                }
+                                if (wall_pn_sub[3] != true && x >= (float)0.75 * info.Width &&
+                                    x <= (float)0.755 * info.Width && y >= (float)0.15 * info.Height
+                                    && y <= (float)0.6 * info.Height)
                                 {
                                     wall_pn_sub[3] = true;
                                     wall_pn[3] = false;
-                                    wall_pn_Level4_main[1] = 0;
                                 }
-                                
-                            }
-                            break;
-                        case 5:
-                            if(wall_pn[4])
-                            {
-                                x = (float)0.75 * info.Width + ((float)0.75 * info.Width - x);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+                                if (wall_pn_sub[3])
+                                {
+                                    x = (float)0.75 * info.Width + ((float)0.75 * info.Width - x);
 
-                    //GAME END
-                    if (y > info.Height || x < 0 || x > info.Width)
+                                    if (wall_pn_Level4_main[1] != 1 && x >= (float)0.6 * info.Width && x <= (float)0.605 * info.Width
+                                        && y >= (float)0.1 * info.Height && y <= (float)0.55 * info.Height)
+                                    {
+                                        wall_pn_Level4_main[1] = 1;
+                                    }
+                                }
+                                //공이 A B 벽이 있을 경우,
+                                //B벽을 맞고 A벽을 맞을때 공의 위치 계산
+                                // A<-->B , A와B 벽사이의 거리 *2 만큼 x위치에서 빼준다.
+                                if (wall_pn_Level4_main[1] == 1)
+                                {
+                                    x = (float)(Vo_test * control_rcos_abs) * t + Init_x - 0.3f * info.Width;
+                                    wall_pn_sub[3] = false;
+
+                                    if (x >= (float)0.75 * info.Width && x <= (float)0.755 * info.Width
+                                        && y >= (float)0.15 * info.Height && y <= (float)0.6 * info.Height)
+                                    {
+                                        wall_pn_sub[3] = true;
+                                        wall_pn[3] = false;
+                                        wall_pn_Level4_main[1] = 0;
+                                    }
+
+                                }
+                                break;
+                            case 5:
+                                if (wall_pn[4])
+                                {
+                                    x = (float)0.75 * info.Width + ((float)0.75 * info.Width - x);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+
+                        //GAME END
+                        if (y > info.Height || x < 0 || x > info.Width)
+                        {
+                            //for (int j = 0; j < cnt_rendering; j += 2)
+                            //{
+                            //    canvas.DrawCircle(x_rendering[j], y_rendering[j], (float)0.01 * info.Width, paint);
+                            //}
+
+                            //Game End Setting, Variable initialization
+                            enable_rendering = true;
+                            GameEndandInitSetting(sender, Game_level, surface, info);
+                            break;
+                        }
+
+                        // End Point Switch On
+                        // First 1~16 check
+                        // 0  1  2  3  4
+                        // |  |  |  |  |
+                        // |  |  |  |  |
+                        // |  |  |  |  |
+                        // |  |  |  |  |
+                        //yes-> Level Up, No-> Game End
+                        if (x > (float)(info.Width * 0.75))
+                        {
+                            GoalBlockDamageCount(Game_level, x, y, info);
+                        }
+
+                        //Add : for rendering
+                        cnt_rendering = i;
+                        x_rendering[i] = x;
+                        y_rendering[i] = y;
+
+                        // //공 위치 갱신 Draw
+                        canvas.DrawCircle(x, y, (float)0.01 * info.Width, paint);
+                    }
+                }
+#endif
+                    if (cnt_rendering >= parabolic_cnt)
+                    {
+                        canvas.DrawCircle(x_rendering[parabolic_cnt], y_rendering[parabolic_cnt], (float)0.01 * info.Width, paint);
+                        if (x_rendering[parabolic_cnt] > (float)(info.Width * 0.75))
+                        {
+                            GoalBlockDamageCount(Game_level, x_rendering[parabolic_cnt], y_rendering[parabolic_cnt], info);
+                        }
+                    }
+                    //Force quit
+                    else
                     {
                         //Game End Setting, Variable initialization
                         GameEndandInitSetting(sender, Game_level, surface, info);
-                        break;
                     }
-
-                    // End Point Switch On
-                    // First 1~16 check
-                    // 0  1  2  3  4
-                    // |  |  |  |  |
-                    // |  |  |  |  |
-                    // |  |  |  |  |
-                    // |  |  |  |  |
-                    //yes-> Level Up, No-> Game End
-                    if (x > (float)(info.Width * 0.75))
+#if false
+                    for (int i = parabolic_cnt - 1; i < parabolic_cnt; i++)
                     {
-                        GoalBlockDamageCount(Game_level, x, y, info);
-                    }
-                    //공 위치 갱신 Draw
-                    canvas.DrawCircle(x, y, (float)0.01 * info.Width, paint);
-                }
+                        if (i == -1) continue;
+                        if (cnt_rendering >= i)
+                        {
+                            canvas.DrawCircle(x_rendering[i], y_rendering[i], (float)0.01 * info.Width, paint);
+                        }
+                        //Force quit
+                        else
+                        {
+                            //Game End Setting, Variable initialization
+                            GameEndandInitSetting(sender, Game_level, surface, info);
+                            break;
+                        }
 
+                        //if (y_rendering[i] > info.Height || x_rendering[i] < 0 || x_rendering[i] > info.Width)
+                        //{
+                        //    //Game End Setting, Variable initialization
+                        //    GameEndandInitSetting(sender, Game_level, surface, info);
+                        //    break;
+                        //}
+                        if (x_rendering[i] > (float)(info.Width * 0.75))
+                        {
+                            GoalBlockDamageCount(Game_level, x_rendering[i], y_rendering[i], info);
+                        }
+                    }
+#endif
+                }
                 //canvasView1에서 canvasView2의 Surface 중복해서 쓰는거 될까??
                 PaintSurface_sub(sender, surface, info);
                 
             }
+        }
+
+        private void PredictPostionCalculate(SKCanvas canvas, SKImageInfo info, float Vo_test)
+        {
+            pos_y_ceiling_touchIncrease = 0;
+
+            pos_y_ceiling_touch = false;
+            for (int i = 0; i < info.Width * 2; i++)
+            {
+                if (i == -1) continue;
+
+                float t = (float)i / 80;
+                float g = 5 * t;
+
+                float x = (float)(Vo_test * control_rcos_abs) * t + Init_x;
+                float y = ((float)(Vo_test * control_rsin_abs) * t - g * t * 4); //info.Height ( ex) 640 )
+                                                                                 //float y_Upside = 0;
+
+                y = Init_y - y;
+
+                //처음 천장 맞은 경우
+                //한번 실행하면서 순간 Y좌표를 저장한다.
+                if (!pos_y_ceiling_touch && y < 0)
+                {
+                    pos_y_ceiling_touch = true;
+                }
+
+                //천장 맞으면 자유 낙하 운동 개념으로 떨어지게..
+                if (pos_y_ceiling_touch)
+                {
+                    pos_y_ceiling_touchIncrease++;
+                    float t_y = (float)pos_y_ceiling_touchIncrease / 25;
+                    //float g_y = 6 * t_y;
+                    //y = t_y * g_y * 5;
+
+                    float g_y = 4 * t_y;
+                    y = t_y * g_y * 2;
+                }
+                /*
+                 * Ball Touch DefenceWall True or False
+                 */
+                DefenceWallTouchJudge(Game_level, x, y, info);
+
+                switch (Game_level)
+                {
+                    case 1:
+                        if (wall_pn[0])
+                        {
+                            x = (float)0.59 * info.Width + ((float)0.59 * info.Width - x);
+                        }
+                        break;
+                    case 2:
+                        if (wall_pn[1])
+                        {
+                            x = (float)0.54 * info.Width + ((float)0.54 * info.Width - x);
+                        }
+                        break;
+                    case 3:
+                        if (wall_pn[2])
+                        {
+                            x = (float)xpos_mirror * info.Width + ((float)xpos_mirror * info.Width - x);
+                        }
+                        break;
+                    case 4:
+                        if (wall_pn[3])
+                        {
+                            x = (float)0.59 * info.Width + ((float)0.59 * info.Width - x);
+                        }
+                        if (wall_pn_sub[3] != true && x >= (float)0.74 * info.Width &&
+                            x <= (float)0.745 * info.Width && y >= (float)0.15 * info.Height
+                            && y <= (float)0.6 * info.Height)
+                        {
+                            wall_pn_sub[3] = true;
+                            wall_pn[3] = false;
+                        }
+                        if (wall_pn_sub[3])
+                        {
+                            x = (float)0.74 * info.Width + ((float)0.74 * info.Width - x);
+
+                            if (wall_pn_Level4_main[1] != 1 && x >= (float)0.61 * info.Width && x <= (float)0.615 * info.Width
+                                && y >= (float)0.1 * info.Height && y <= (float)0.55 * info.Height)
+                            {
+                                wall_pn_Level4_main[1] = 1;
+                            }
+                        }
+                        //공이 A B 벽이 있을 경우,
+                        //B벽을 맞고 A벽을 맞을때 공의 위치 계산
+                        // A<-->B , A와B 벽사이의 거리 *2 만큼 x위치에서 빼준다.
+                        if (wall_pn_Level4_main[1] == 1)
+                        {
+                            x = (float)(Vo_test * control_rcos_abs) * t + Init_x - 0.3f * info.Width;
+                            wall_pn_sub[3] = false;
+
+                            if (x >= (float)0.74 * info.Width && x <= (float)0.745 * info.Width
+                                && y >= (float)0.15 * info.Height && y <= (float)0.6 * info.Height)
+                            {
+                                wall_pn_sub[3] = true;
+                                wall_pn[3] = false;
+                                wall_pn_Level4_main[1] = 0;
+                            }
+
+                        }
+                        break;
+                    case 5:
+                        if (wall_pn[4])
+                        {
+                            x = (float)0.74 * info.Width + ((float)0.74 * info.Width - x);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                //Add : for pre-rendering
+                cnt_rendering = i;
+                x_rendering[i] = x;
+                y_rendering[i] = y;
+
+                // GAME END
+                // End rendering point save
+                if (y > info.Height || x < 0 || x > info.Width)
+                {
+                    enable_rendering = true;
+                    cnt_rendering = i;
+                    break;
+                }
+            }
+
         }
 
         private void PredictArrowDirection(SKCanvas canvas, SKImageInfo info, SKPaint paint_PredictArrow)
@@ -421,8 +623,8 @@ namespace ParbolicMotionGame.ViewModels
             switch (LEVEL)
             {
                 case 1:
-                    if (wall_pn[0] != true && x >= (float)0.6 * info.Width &&
-                        x <= (float)0.62 * info.Width && y >= (float)0.2 * info.Height
+                    if (wall_pn[0] != true && x >= (float)0.59 * info.Width &&
+                        x <= (float)0.60 * info.Width && y >= (float)0.2 * info.Height
                         && y <= (float)0.8 * info.Height)
                     {
                         wall_pn[0] = true;
@@ -442,7 +644,7 @@ namespace ParbolicMotionGame.ViewModels
                         && y <= (float)0.20 * info.Height)
                     {
                         wall_pn[2] = true;
-                        xpos_mirror = (float)0.51;
+                        xpos_mirror = (float)(0.51-0.01);
                     }
                     else if (wall_pn[2] != true && x >= (float)0.52 * info.Width &&
                         x <= (float)0.54 * info.Width && y >= (float)0.20 * info.Height
@@ -651,13 +853,13 @@ namespace ParbolicMotionGame.ViewModels
             }
             else
             {
-                /*
-                 * LEVEL 1~5 Wall Make
-                 */
-                DefenceWallMake(Game_level, canvas, info);
+                // /*
+                //  *  LEVEL 1~5 Wall Make
+                //  */
+                // DefenceWallMake(Game_level, canvas, info);
 
                 /*
-                 * Goal Block Destroy Effect
+                 *  Goal Block Destroy Effect
                  */
                 SKCanvas canvas_GoalBlock = surface.Canvas;
                 GoalBlockDestroyEffect(Game_level, canvas_GoalBlock, info, surface);
@@ -874,15 +1076,18 @@ namespace ParbolicMotionGame.ViewModels
 
         private void DefenceWallMake(int LEVEL, SKCanvas canvas, SKImageInfo info)
         {
+            int tempmove = (cnt_defencewallrendering+1) % 10; //0~9
             //LEVEL 1 Example
-            switch(LEVEL)
+            switch (LEVEL)
             {
                 case 1:
                     SKPoint[] DefenceWallLevel_1 = new SKPoint[4];
-                    DefenceWallLevel_1[0] = new SKPoint((float)0.6 * info.Width, (float)0.2 * info.Height);
-                    DefenceWallLevel_1[1] = new SKPoint((float)0.61 * info.Width, (float)0.2 * info.Height);
-                    DefenceWallLevel_1[2] = new SKPoint((float)0.6 * info.Width, (float)0.8 * info.Height);
-                    DefenceWallLevel_1[3] = new SKPoint((float)0.61 * info.Width, (float)0.8 * info.Height);
+                    defencewall_1_y[0] = defencewall_1_y[0] - (0.01f) * tempmove;
+                    defencewall_1_y[1] = defencewall_1_y[1] - (0.01f) * tempmove;
+                    DefenceWallLevel_1[0] = new SKPoint(defencewall_1_x[0] * info.Width, defencewall_1_y[0] * info.Height);
+                    DefenceWallLevel_1[1] = new SKPoint(defencewall_1_x[1] * info.Width, defencewall_1_y[0] * info.Height);
+                    DefenceWallLevel_1[2] = new SKPoint(defencewall_1_x[0] * info.Width, defencewall_1_y[1] * info.Height);
+                    DefenceWallLevel_1[3] = new SKPoint(defencewall_1_x[1] * info.Width, defencewall_1_y[1] * info.Height);
 
                     SKPaint paintDefenceWallLevel_1 = new SKPaint
                     {
@@ -981,6 +1186,7 @@ namespace ParbolicMotionGame.ViewModels
             {
                 drag_onoff = false;
                 game_touch_enable = true;
+                //StartTimer_Wall(sender);
                 switch (e.ActionType)
                 {
                     case SKTouchAction.Moved:
@@ -1034,6 +1240,7 @@ namespace ParbolicMotionGame.ViewModels
                 {
                     game_touch_enable = false;
                     TouchOnOff = false;
+                    time_interval = 5;
                     StartTimer(sender); //Make SK Graphics
                 }
 
@@ -1197,8 +1404,6 @@ namespace ParbolicMotionGame.ViewModels
                 Init_x = control_rcos * default_radius_move_allow + default_Init_x;
                 Init_y = control_rsin * default_radius_move_allow + default_Init_y;
             }
-            //control_rcos_abs = Math.Abs((Init_x - default_Init_x) / dis_init_circle); //각도 절대값 괜찮나?
-            //control_rsin_abs = Math.Abs((Init_y - default_Init_y) / dis_init_circle); //각도 절대값 괜찮나?
             control_rcos_abs = ((default_Init_x - Init_x) / dis_init_circle);
             control_rsin_abs = ((Init_y - default_Init_y) / dis_init_circle);
 
@@ -1213,6 +1418,15 @@ namespace ParbolicMotionGame.ViewModels
 
         private void GameEndandInitSetting(object sender, int LEVEL, SKSurface surface, SKImageInfo info)
         {
+            
+            
+            //enable_rendering = true;
+            for (int i = 0; i < cnt_rendering; i++)
+            {
+                x_rendering[i] = 0f;
+                y_rendering[i] = 0f;
+            }
+
             parabolic_cnt = 0;
             time_interval = 0;
             BlockRotationCnt = 0;
@@ -1236,7 +1450,12 @@ namespace ParbolicMotionGame.ViewModels
 
             if (timer_stop_PN)
             {
+               /*
+                * Timer Stop
+                */
                 timer_stop();
+                //timer_stop_wall();
+
                 timer_stop_PN = false;
                 timer_stop_PN_BlockRotation = false;
                 drag_onoff = true; //Initial x,y 
@@ -1300,6 +1519,14 @@ namespace ParbolicMotionGame.ViewModels
             }
             Game_power = 0;
             Game_rad = 0;
+
+
+            //Add : For rendering
+            //StartTimer(sender);
+            //canvas.Clear();
+
+            cnt_rendering = 0;
+            enable_rendering = false;
 
             if (game_over)
             {
@@ -1424,6 +1651,7 @@ namespace ParbolicMotionGame.ViewModels
             game_over = false;
 
             timer_stop_PN = false;
+            TouchOnOff = true; 
             drag_onoff = true; //Initial x,y 
             Init_x = 0;
             Init_y = 0;
@@ -1496,11 +1724,38 @@ namespace ParbolicMotionGame.ViewModels
             }
         }
 
+        public void DeviceTimer_Wall()
+        {
+           Device.StartTimer(TimeSpan.FromMilliseconds(100), () =>
+           {
+               cnt_defencewallrendering++;
+               return true;
+           });
+
+        }
+
+        public void StartTimer_Wall(object sender)
+        {
+            timer_start_wall(MY_WALL_TIMER_TICK_OBECT, sender, 0, time_interval);
+        }
+
+        private void timer_start_wall(TimerCallback callback, object sender, int start, int time_interval)
+        {
+            timer_wall = new System.Threading.Timer(callback, sender, start, time_interval);
+        }
+
+        private async void MY_WALL_TIMER_TICK_OBECT(object sender)
+        {
+            await Task.Run(() =>
+            {
+                cnt_defencewallrendering++;
+            });
+        }
+
         public void StartTimer(object sender)
         {
             if (timer_stop_PN)
             {
-                time_interval = 5;
                 timer_start(MY_TIMER_TICK_OBJECT, sender, 0, time_interval);
             }
         }
@@ -1530,6 +1785,12 @@ namespace ParbolicMotionGame.ViewModels
         private void timer_stop()
         {
             timer_.Dispose();
+        }
+
+        private void timer_stop_wall()
+        {
+            timer_wall.Dispose();
+            
         }
 
 #region notifyproperty
