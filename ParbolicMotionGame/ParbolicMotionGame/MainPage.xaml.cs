@@ -26,20 +26,37 @@ namespace ParbolicMotionGame
         public MainPage()
         {
             InitializeComponent();
-            BindingContext = new CanvasView1();
-            CanvasView2.InvalidateSurface();
+            CanvasView3.InvalidateSurface();
             CanvasView.InvalidateSurface();
+            BindingContext = new CanvasView1();
+            //CanvasView2.InvalidateSurface();
+            //CanvasView.InvalidateSurface();
         }
 
         private void CanvasView_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
-            canvasView1.PaintSurface_main(sender, e.Surface, e.Info);
+            //canvasView1.PaintSurface_main(sender, e.Surface, e.Info);
+            canvasView1.PaintSurface_main_Ver2(sender, e.Surface, e.Info);
+        }
+
+        private void CanvasView_PaintSurface3(object sender, SKPaintSurfaceEventArgs e)
+        {
+            //CanvasView1 canvasView1 = (CanvasView1)BindingContext;
+            //canvasView1.PaintSurface_StartTitle(sender, e.Surface, e.Info);
         }
 
         private void CanvasView_PaintSurface2(object sender, SKPaintSurfaceEventArgs e)
         {
 
+        }
+
+        //Game Start Title
+        private void CanvasView_Touch_StartEvent(object sender, SKTouchEventArgs e)
+        {
+            //CanvasView1 canvasView1 = (CanvasView1)BindingContext;
+            //
+            //canvasView1.TouchTitle(sender, e);
         }
 
         //Game Start
@@ -55,9 +72,9 @@ namespace ParbolicMotionGame
             CanvasView.InvalidateSurface();
         }
 
-        public void CanvasView2_Invalidate()
+        public void CanvasView3_Invalidate()
         {
-            CanvasView2.InvalidateSurface();
+            CanvasView3.InvalidateSurface();
         }
 
         async public void Button_Clicked(object sender, EventArgs e)

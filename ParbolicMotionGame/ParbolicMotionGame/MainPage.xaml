@@ -109,6 +109,14 @@
                                Grid.RowSpan="2"
                                Grid.ColumnSpan="9"/>
 
+            <skia:SKCanvasView x:Name="CanvasView3"
+                               PaintSurface="CanvasView_PaintSurface3"
+                               EnableTouchEvents="{Binding Game_start_touch_enable}"
+                               Touch="CanvasView_Touch_StartEvent"
+                               Grid.Row="1"
+                               Grid.RowSpan="2"
+                               Grid.ColumnSpan="9"/>
+
         </Grid>
     </StackLayout>
 </ContentPage>
