@@ -93,11 +93,21 @@
                     IsEnabled="{Binding GameDebugLevelDown_Enable}"
                     TextColor="Black"/>
 
+            <Button Text="TOUCH START" FontSize="24" FontFamily="Yet R"
+                    x:Name="GameStartTitleButton"
+                    Grid.Row="1"
+                    Grid.RowSpan="2"
+                    Grid.ColumnSpan="9"
+                    Clicked="Button_Clicked_StartTitle" IsVisible="{Binding GameStartTitle_Visible}"
+                    IsEnabled="{Binding GameStartTitle_Enable}"
+                    TextColor="Red"/>
+
             <skia:SKCanvasView x:Name="CanvasView"
                                PaintSurface="CanvasView_PaintSurface"
                                EnableTouchEvents="{Binding Game_touch_enable}"
                                
-                               Touch="CanvasView_Touch"        
+                               Touch="CanvasView_Touch"       
+
                                Grid.Row="1"
                                Grid.RowSpan="2"
                                Grid.ColumnSpan="9">

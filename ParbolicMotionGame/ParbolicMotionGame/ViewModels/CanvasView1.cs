@@ -117,12 +117,16 @@ namespace ParbolicMotionGame.ViewModels
         int game_rad = 0;
         bool game_Btn_Visible = false;
         bool game_Btn_Enable = false;
-        bool game_touch_enable = true;
+        bool game_touch_enable = false;
         bool game_start_touch_enable = false;
-        bool gameDebugLevelUp_Visble = true; //Debug -> true, default : false
-        bool gameDebugLevelDown_Visble = true;
-        bool gameDebugLevelUp_Enable = true;
-        bool gameDebugLevelDown_Enable = true;
+        bool gameDebugLevelUp_Visble = false; //Debug -> true, default : false
+        bool gameDebugLevelDown_Visble = false;
+        bool gameDebugLevelUp_Enable = false;
+        bool gameDebugLevelDown_Enable = false;
+        bool gameStartTitle_Visible = false;
+        bool gameStartTitle_Enable = false;
+        bool GameInitOnOff = true;
+
         public int Game_power { get => game_power; set { game_power = value; NotifyPropertyChanged("Game_power"); } }
         public int Game_level { get => game_level; set { game_level = value; NotifyPropertyChanged("Game_level"); } }
         public int Game_score { get => game_score; set { game_score = value; NotifyPropertyChanged("Game_score"); } }
@@ -130,11 +134,14 @@ namespace ParbolicMotionGame.ViewModels
         public bool Game_Btn_Visible { get => game_Btn_Visible; set { game_Btn_Visible = value; NotifyPropertyChanged("Game_Btn_Visible"); } }
         public bool Game_Btn_Enable { get => game_Btn_Enable; set { game_Btn_Enable = value; NotifyPropertyChanged("Game_Btn_Enable"); } }
         public bool Game_touch_enable { get => game_touch_enable; set { game_touch_enable = value; NotifyPropertyChanged("Game_touch_enable"); } }
-        public bool Game_start_touch_enable { get => game_start_touch_enable; set { game_start_touch_enable = value; NotifyPropertyChanged("Game_touch_enable"); } }
+        public bool Game_start_touch_enable { get => game_start_touch_enable; set { game_start_touch_enable = value; NotifyPropertyChanged("Game_start_touch_enable"); } }
         public bool GameDebugLevelUp_Enable { get => gameDebugLevelUp_Enable; set { gameDebugLevelUp_Enable = value; NotifyPropertyChanged("GameDebugLevelUp_Enable"); } }
         public bool GameDebugLevelUp_Visble { get => gameDebugLevelUp_Visble; set { gameDebugLevelUp_Visble = value; NotifyPropertyChanged("GameDebugLevelUp_Visble"); } }
         public bool GameDebugLevelDown_Enable { get => gameDebugLevelDown_Enable; set { gameDebugLevelDown_Enable = value; NotifyPropertyChanged("GameDebugLevelDown_Enable"); } }
         public bool GameDebugLevelDown_Visble { get => gameDebugLevelDown_Visble; set { gameDebugLevelDown_Visble = value; NotifyPropertyChanged("GameDebugLevelDown_Visble"); } }
+
+        public bool GameStartTitle_Visible { get => gameStartTitle_Visible; set { gameStartTitle_Visible = value; NotifyPropertyChanged("GameStartTitle_Visible"); } }
+        public bool GameStartTitle_Enable { get => gameStartTitle_Enable; set { gameStartTitle_Enable = value; NotifyPropertyChanged("GameStartTitle_Enable"); } }
 
         /*
          *  Enum 
@@ -279,7 +286,7 @@ namespace ParbolicMotionGame.ViewModels
                     */
                     if (!enable_rendering)
                     {
-                        PredictPostionCalculate(canvas, info, Vo_test);
+                        //PredictPostionCalculate(canvas, info, Vo_test);
                     }
 #if false
                 if (!TouchOnOff)
@@ -541,7 +548,7 @@ namespace ParbolicMotionGame.ViewModels
                         /*
                          * x,y Position Pre-Calculate
                          */
-                        PredictPostionCalculate(canvas, info, Vo_test);
+                        //PredictPostionCalculate(canvas, info, Vo_test);
                     }
                     break;
 
@@ -601,12 +608,38 @@ namespace ParbolicMotionGame.ViewModels
         {
             SKCanvas canvas = surface.Canvas; //그래픽그리기 컨텍스트
                                               //개체는 그래픽 SKCanvan 변환과 클리핑을 포함 하는 그래픽 상태를 캡슐화 합니다.
-
+            canvas.Clear();
             switch (GameState)
             {
                 case (int)GameStartCondition.GameTitle:
                     {
-                        GameStartTitle_textdraw(sender, surface, info);
+                        //GameStartTitle_textdraw(sender, surface, info);
+                        //canvas.Clear();
+                        DefenceWallMake(Game_level, canvas, info);
+                        GameLevelTextCanvas(Game_level, sender, surface, info);
+                        InitBallPostion(Game_level, info);
+                        GoalBlockDrawOnly(Game_level, canvas);
+
+                        //Init Restrict Circle Location Paint
+                        SKCanvas canvas_restrictcircle = surface.Canvas;
+                        SKCanvas canvas_initcircle = surface.Canvas;
+
+                        // 공 날리기전에는 무조건 초기 원 설정 범위 내부에 들어오게 한다.
+                        if (timer_stop_PN != true)
+                        {
+                            canvas_restrictcircle.DrawCircle(InitConstant_X, InitConstant_Y, (float)(info.Width * 0.07), paint_restrictcircle);
+                            canvas_initcircle.DrawCircle(Init_x, Init_y, (float)(info.Width * 0.01), paintInitBall);
+                        }
+
+                        GoalBlockRectPosition(info, canvas, paint_GoalBlock);
+
+                        if (GameInitOnOff)
+                        {
+                            StartTimer(sender);
+                            DeviceTimer_Wall(sender);
+                            GameInitOnOff = false;
+                        }
+                        //canvas.Clear();
                     }
                     break;
 
@@ -618,7 +651,7 @@ namespace ParbolicMotionGame.ViewModels
                         DefenceWallMake(Game_level, canvas, info);
 
                         GameLevelTextCanvas(Game_level, sender, surface, info);
-
+                        GoalBlockDrawOnly(Game_level, canvas);
                         /*
                          * BALL: Start Position
                          */
@@ -652,10 +685,16 @@ namespace ParbolicMotionGame.ViewModels
                         Game_power = (int)Vo_test;
                         Game_rad = (int)(control_rcos_abs * 100);
 
+                        // /*
+                        //  * x,y Position Pre-Calculate
+                        //  */
+                        // PredictPostionCalculate(canvas, info, Vo_test, control_rcos_abs, control_rsin_abs);
+
                         /*
                          *  Start Direction Prediction Arrow Graphics
                          */
                         PredictArrowDirection(canvas, info, paint_PredictArrow);
+
                     }
                     break;
 
@@ -666,27 +705,23 @@ namespace ParbolicMotionGame.ViewModels
                          */
                         DefenceWallMake(Game_level, canvas, info);
 
+                        /*
+                         * x,y Position Pre-Calculate
+                         */
+                        if (cnt_gameplayrender == 0)
+                        {
+                            PredictPostionCalculate(canvas, info, Vo_test, control_rcos_abs, control_rsin_abs);
+                            time_interval = 2;
+                        }
                         cnt_gameplayrender++;
                         GameLevelTextCanvas(Game_level, sender, surface, info);
 
-                        /*
-                         * Game Level 1,2,3,4,5
-                         * Switch - case ?
-                         * rect position cal : GameLevel 1
-                         */
-                        GoalBlockRectPosition(info, canvas, paint_GoalBlock);
-
                         if (cnt_rendering >= cnt_gameplayrender)
                         {
-                            canvas.DrawCircle(x_rendering[parabolic_cnt], y_rendering[parabolic_cnt], (float)0.01 * info.Width, paint);
-                            if (x_rendering[parabolic_cnt] > (float)(info.Width * 0.75))
+                            canvas.DrawCircle(x_rendering[cnt_gameplayrender], y_rendering[cnt_gameplayrender], (float)0.01 * info.Width, paint);
+                            if (x_rendering[cnt_gameplayrender] > (float)(info.Width * 0.75))
                             {
-                                GoalBlockDamageCount(Game_level, x_rendering[parabolic_cnt], y_rendering[parabolic_cnt], info);
-
-                                /*
-                                 *  Goal Block Destroy Effect
-                                 */
-                                GoalBlockDestroyEffect(Game_level, canvas, info, surface);
+                                GoalBlockDamageCount(Game_level, x_rendering[cnt_gameplayrender], y_rendering[cnt_gameplayrender], info);
                             }
                         }
                         //Force quit
@@ -695,6 +730,11 @@ namespace ParbolicMotionGame.ViewModels
                             //Game End Setting, Variable initialization
                             GameEndandInitSetting(sender, Game_level, surface, info);
                         }
+
+                        /*
+                         *  Goal Block Destroy Effect
+                         */
+                        GoalBlockDestroyEffect(Game_level, canvas, info, surface);
 
                     }
                     break;
@@ -720,7 +760,7 @@ namespace ParbolicMotionGame.ViewModels
             }
         }
 
-        private void PredictPostionCalculate(SKCanvas canvas, SKImageInfo info, float Vo_test)
+        private void PredictPostionCalculate(SKCanvas canvas, SKImageInfo info, float Vo_test, float control_rcos_abs, float control_rsin_abs)
         {
             pos_y_ceiling_touchIncrease = 0;
 
@@ -1183,6 +1223,64 @@ namespace ParbolicMotionGame.ViewModels
             }
         }
 
+        private void GoalBlockDrawOnly(int LEVEL, SKCanvas canvas)
+        {
+            SKPaint paintGoalBlock = new SKPaint
+            {
+                Style = SKPaintStyle.Fill,
+                Color = Color.Blue.ToSKColor()
+            };
+            switch (LEVEL)
+            {
+                case 1:
+                    for (int i = 0; i < 16; i++)
+                            canvas.DrawRect(rect[i], paintGoalBlock);
+                    break;
+                case 2:
+                    for (int i = 1; i < 4; i++)
+                    {
+                        for (int j = 0; j < 3; j++)
+                        {
+                            int position = i + j * 4;
+                            canvas.DrawRect(rect[position], paintGoalBlock);
+                        }
+                    }
+                    break;
+                case 3:
+                    for (int i = 2; i < 4; i++)
+                    {
+                        for (int j = 0; j < 2; j++)
+                        {
+                            int position = i + j * 4;
+                            canvas.DrawRect(rect[position], paintGoalBlock);
+                        }
+                    }
+                    break;
+                case 4:
+                    for (int i = 2; i < 4; i++)
+                    {
+                        for (int j = 0; j < 1; j++)
+                        {
+                            int position = i + j * 4;
+                            canvas.DrawRect(rect[position], paintGoalBlock);
+                        }
+                    }
+                    break;
+                case 5:
+                    for (int i = 3; i < 4; i++)
+                    {
+                        for (int j = 0; j < 1; j++)
+                        {
+                            int position = i + j * 4;
+                            canvas.DrawRect(rect[position], paintGoalBlock);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private void GoalBlockDestroyEffect(int LEVEL, SKCanvas canvas, SKImageInfo info, SKSurface surface)
         {
             SKPaint paintGoalBlock = new SKPaint
@@ -1401,9 +1499,9 @@ namespace ParbolicMotionGame.ViewModels
                 case 1:
                     SKPoint[] DefenceWallLevel_1 = new SKPoint[4];
                     DefenceWallLevel_1[0] = new SKPoint(defencewall_1_x[0] * info.Width, defencewall_1_y[0] * info.Height);
-                    DefenceWallLevel_1[1] = new SKPoint(defencewall_1_x[1] * info.Width, defencewall_1_y[0] * info.Height);
+                    //DefenceWallLevel_1[1] = new SKPoint(defencewall_1_x[1] * info.Width, defencewall_1_y[0] * info.Height);
                     DefenceWallLevel_1[2] = new SKPoint(defencewall_1_x[0] * info.Width, defencewall_1_y[1] * info.Height);
-                    DefenceWallLevel_1[3] = new SKPoint(defencewall_1_x[1] * info.Width, defencewall_1_y[1] * info.Height);
+                    //DefenceWallLevel_1[3] = new SKPoint(defencewall_1_x[1] * info.Width, defencewall_1_y[1] * info.Height);
 
                     SKPaint paintDefenceWallLevel_1 = new SKPaint
                     {
@@ -1529,22 +1627,25 @@ namespace ParbolicMotionGame.ViewModels
             if (game_touch_enable)
             {
                 drag_onoff = false;
-                
+
+                // GameState Change
+                GameState = (int)GameStartCondition.GameInit;
+
                 //StartTimer_Wall(sender);
                 switch (e.ActionType)
                 {
-                    case SKTouchAction.Entered:
-                        //GameState Change
-                        GameState = (int)GameStartCondition.GameInit;
-
-                        StartTimer(sender);
-                        game_touch_enable = true;
-
-                        //copy git
-                        e.Handled = true;
-                        //TouchMotion Wait?
-                        EndWaitTime(5000);
-                        break;
+                    //case SKTouchAction.Entered:
+                    //    //GameState Change
+                    //    GameState = (int)GameStartCondition.GameInit;
+                    //
+                    //    StartTimer(sender);
+                    //    game_touch_enable = true;
+                    //
+                    //    //copy git
+                    //    e.Handled = true;
+                    //    //TouchMotion Wait?
+                    //    EndWaitTime(5000);
+                    //    break;
                     case SKTouchAction.Moved:
                         Init_x = e.Location.X;
                         Init_y = e.Location.Y;
@@ -1805,9 +1906,6 @@ namespace ParbolicMotionGame.ViewModels
             //BlockRotationCnt = 0;
             //game_over = true;
 
-            // GameState Change
-            GameState = (int)GameStartCondition.GameEnd;
-
             pos_y_ceiling_touch = false;
             pos_y_ceiling_touchIncrease = pos_y_Increase;
             xpos_mirror = 0;
@@ -1827,12 +1925,12 @@ namespace ParbolicMotionGame.ViewModels
 
             if (timer_stop_PN)
             {
-               /*
-                * Timer Stop
-                */
-                timer_stop();
-                //timer_stop_wall();
+                /*
+                 * Timer Stop
+                 */
 
+                //timer_stop_wall();
+                //timer_stop();
                 timer_stop_PN = false;
                 timer_stop_PN_BlockRotation = false;
                 drag_onoff = true; //Initial x,y 
@@ -1933,8 +2031,11 @@ namespace ParbolicMotionGame.ViewModels
                 EndWaitTime(1000); // Add for End Btn Image 
                 Game_Btn_Visible = false;
                 Game_Btn_Enable = false;
+                //gameStartTitle_Visible = true;
+                //gameStartTitle_Enable = true;
                 EndWaitTime(1000); // Add for End Btn Image
-                Gameover_textdraw(sender, surface, info);           
+                Gameover_textdraw(sender, surface, info);
+                timer_stop();
             }
             else
             {
@@ -2099,7 +2200,11 @@ namespace ParbolicMotionGame.ViewModels
             game_start_touch_enable = true;
             Game_Btn_Visible = false;
             Game_Btn_Enable = true;
-            
+            cnt_defencewallrendering_1 = 0;
+            cnt_defencewallrendering_2 = 0;
+            cnt_defencewallrendering_3 = 0;
+            cnt_defencewallrendering_4 = 0;
+            cnt_defencewallrendering_5 = 0;
             //((MainPage)sender).CanvasView3_Invalidate();
         }
 
@@ -2148,6 +2253,15 @@ namespace ParbolicMotionGame.ViewModels
             Game_Btn_Visible = false;
             Game_Btn_Enable = true;
         }
+
+        public void Btn_StartTitle(object sender, EventArgs e)
+        {
+            gameStartTitle_Visible = false;
+            gameStartTitle_Enable = false;
+            game_touch_enable = true;
+            //StartTimer(sender);
+        }
+
         private void StartTimer_BlockRotation()
         {
             if (timer_stop_PN)
@@ -2160,7 +2274,7 @@ namespace ParbolicMotionGame.ViewModels
         {
             //Only-One use
             Game_level = 1;
-            Device.StartTimer(TimeSpan.FromMilliseconds(35), () =>
+            Device.StartTimer(TimeSpan.FromMilliseconds(5), () =>
             {
                 switch (Game_level)
                 {
@@ -2168,9 +2282,10 @@ namespace ParbolicMotionGame.ViewModels
                         cnt_defencewallrendering_1++;
                         if (wallupdown) // up
                         {
-                            defencewall_1_y[0] = 0.2f - 0.002f * (cnt_defencewallrendering_1);
                             defencewall_1_y[1] = 0.8f - 0.002f * (cnt_defencewallrendering_1);
-                            if (cnt_defencewallrendering_1 == 99)
+                            defencewall_1_y[0] = 0.2f - 0.002f * (cnt_defencewallrendering_1);
+                            //defencewall_1_y[1] = 0.8f - 0.002f * (cnt_defencewallrendering_1);
+                            if (cnt_defencewallrendering_1 >= 99)
                             {
                                 wallupdown = false;
                                 cnt_defencewallrendering_1 = 0;
@@ -2178,9 +2293,10 @@ namespace ParbolicMotionGame.ViewModels
                         }
                         else //down
                         {
-                            defencewall_1_y[0] = 0.002f + 0.002f * (cnt_defencewallrendering_1);
                             defencewall_1_y[1] = 0.602f + 0.002f * (cnt_defencewallrendering_1);
-                            if (cnt_defencewallrendering_1 == 99)
+                            defencewall_1_y[0] = 0.002f + 0.002f * (cnt_defencewallrendering_1);
+                            //defencewall_1_y[1] = 0.602f + 0.002f * (cnt_defencewallrendering_1);
+                            if (cnt_defencewallrendering_1 >= 99)
                             {
                                 wallupdown = true;
                                 cnt_defencewallrendering_1 = 0;

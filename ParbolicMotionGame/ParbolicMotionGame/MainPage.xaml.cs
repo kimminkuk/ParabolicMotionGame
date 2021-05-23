@@ -100,6 +100,7 @@ namespace ParbolicMotionGame
             CanvasView1_Invalidate();
         }
 
+        //For Debug
         private void Button_Clicked_LevelUp(object sender, EventArgs e)
         {
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
@@ -108,7 +109,7 @@ namespace ParbolicMotionGame
             CanvasView1_Invalidate();
         }
 
-
+        //For Debug
         private void Button_Clicked_LevelDown(object sender, EventArgs e)
         {
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
@@ -117,6 +118,14 @@ namespace ParbolicMotionGame
             CanvasView1_Invalidate();
         }
 
+
+        private void Button_Clicked_StartTitle(object sender, EventArgs e)
+        {
+            CanvasView1 canvasView1 = (CanvasView1)BindingContext;
+            canvasView1.Btn_StartTitle(sender, e);
+
+            CanvasView1_Invalidate();
+        }
 
         public void Button_View(bool onoff)
         {
