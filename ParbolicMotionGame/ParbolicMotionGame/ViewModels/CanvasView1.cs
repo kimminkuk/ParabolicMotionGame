@@ -68,6 +68,8 @@ namespace ParbolicMotionGame.ViewModels
         int cnt_gameplayrender = 0;
         bool enable_rendering = false;
         float Vo_test = 0f;
+        int Vo_test_Power = 1000;
+
         /*
          *  Update : Wall Motion Rendering
          */
@@ -126,7 +128,7 @@ namespace ParbolicMotionGame.ViewModels
         bool gameStartTitle_Visible = false;
         bool gameStartTitle_Enable = false;
         bool GameInitOnOff = true;
-
+        bool GameInitDeviceTimerOnOff = true;
         public int Game_power { get => game_power; set { game_power = value; NotifyPropertyChanged("Game_power"); } }
         public int Game_level { get => game_level; set { game_level = value; NotifyPropertyChanged("Game_level"); } }
         public int Game_score { get => game_score; set { game_score = value; NotifyPropertyChanged("Game_score"); } }
@@ -613,11 +615,29 @@ namespace ParbolicMotionGame.ViewModels
             {
                 case (int)GameStartCondition.GameTitle:
                     {
-                        //GameStartTitle_textdraw(sender, surface, info);
-                        //canvas.Clear();
+                        /*
+                         *  LEVEL 1~5 Wall Make
+                         */
                         DefenceWallMake(Game_level, canvas, info);
+
+                        /*
+                         *  Game Level Text Make
+                         */
                         GameLevelTextCanvas(Game_level, sender, surface, info);
+
+                        /*
+                         *  Init Ball Position Draw Make
+                         */
                         InitBallPostion(Game_level, info);
+
+                        /*
+                         *  Goal Block Position Calculate
+                         */
+                        GoalBlockRectPosition(info, canvas, paint_GoalBlock);
+
+                        /*
+                         *  Goal Block DrawOnly Make
+                         */
                         GoalBlockDrawOnly(Game_level, canvas);
 
                         //Init Restrict Circle Location Paint
@@ -631,15 +651,20 @@ namespace ParbolicMotionGame.ViewModels
                             canvas_initcircle.DrawCircle(Init_x, Init_y, (float)(info.Width * 0.01), paintInitBall);
                         }
 
-                        GoalBlockRectPosition(info, canvas, paint_GoalBlock);
-
+                        /*
+                         *  App Start -> Device Timer(Wall Motion Calculate),
+                         *               Thread Timer(SKcanvas ReDraw (Invalidate))
+                         */
                         if (GameInitOnOff)
                         {
                             StartTimer(sender);
-                            DeviceTimer_Wall(sender);
+                            if (GameInitDeviceTimerOnOff)
+                            {
+                                DeviceTimer_Wall(sender);
+                            }
                             GameInitOnOff = false;
+                            GameInitDeviceTimerOnOff = false;
                         }
-                        //canvas.Clear();
                     }
                     break;
 
@@ -650,8 +675,16 @@ namespace ParbolicMotionGame.ViewModels
                          */
                         DefenceWallMake(Game_level, canvas, info);
 
+                        /*
+                         *  Game Level Text Make
+                         */
                         GameLevelTextCanvas(Game_level, sender, surface, info);
+
+                        /*
+                         *  Goal Block DrawOnly Make
+                         */
                         GoalBlockDrawOnly(Game_level, canvas);
+
                         /*
                          * BALL: Start Position
                          */
@@ -668,7 +701,9 @@ namespace ParbolicMotionGame.ViewModels
                             canvas_initcircle.DrawCircle(Init_x, Init_y, (float)(info.Width * 0.01), paintInitBall);
                         }
 
-                        //Init Rad Cal
+                        /*
+                         *  Ball Radius and Degree Calculate
+                         */
                         Init_Rad_cal();
 
                         // 공 날리기전에는 무조건 초기 원 설정 범위 내부에 들어오게 한다.
@@ -679,16 +714,11 @@ namespace ParbolicMotionGame.ViewModels
 
                         //TEST ACTION
                         Vo_test = ((float)Math.Sqrt((Math.Pow(Init_x - default_Init_x, 2) + Math.Pow(Init_y - default_Init_y, 2)))
-                            / default_radius_move_allow) * 350; //300은 조금 약하고,, 400은 너무 쌔다..500 -> 600 ->
+                            / default_radius_move_allow) * Vo_test_Power; //300은 조금 약하고,, 400은 너무 쌔다..500 -> 600 -> 1000 ( Thread 동작 개선했더니 느려짐 )
 
                         //Binding Text Collection
                         Game_power = (int)Vo_test;
                         Game_rad = (int)(control_rcos_abs * 100);
-
-                        // /*
-                        //  * x,y Position Pre-Calculate
-                        //  */
-                        // PredictPostionCalculate(canvas, info, Vo_test, control_rcos_abs, control_rsin_abs);
 
                         /*
                          *  Start Direction Prediction Arrow Graphics
@@ -711,7 +741,6 @@ namespace ParbolicMotionGame.ViewModels
                         if (cnt_gameplayrender == 0)
                         {
                             PredictPostionCalculate(canvas, info, Vo_test, control_rcos_abs, control_rsin_abs);
-                            time_interval = 2;
                         }
                         cnt_gameplayrender++;
                         GameLevelTextCanvas(Game_level, sender, surface, info);
@@ -724,7 +753,7 @@ namespace ParbolicMotionGame.ViewModels
                                 GoalBlockDamageCount(Game_level, x_rendering[cnt_gameplayrender], y_rendering[cnt_gameplayrender], info);
                             }
                         }
-                        //Force quit
+                        //Ball Rendering End and Finish Condition Check
                         else
                         {
                             //Game End Setting, Variable initialization
@@ -793,8 +822,8 @@ namespace ParbolicMotionGame.ViewModels
                     //float g_y = 6 * t_y;
                     //y = t_y * g_y * 5;
 
-                    float g_y = 4 * t_y;
-                    y = t_y * g_y * 2;
+                    float g_y = 7 * t_y;
+                    y = t_y * g_y * 5;
                 }
                 /*
                  * Ball Touch DefenceWall True or False
@@ -892,9 +921,9 @@ namespace ParbolicMotionGame.ViewModels
             if (TouchOnOff)
             {
                 //paintInitBall, 예측 공 Paint
-                for (int i = 1; i < 15; i++)
+                for (int i = 1; i < Vo_test_Power/100; i++)
                 {
-                    float Predict_t = 0.125f * i;
+                    float Predict_t = 0.125f * i/2;
                     float Predict_g = 5 * Predict_t;
                     float Predict_x = (float)(Game_power * control_rcos_abs) * Predict_t + Init_x;
                     float Predict_y = ((float)(Game_power * control_rsin_abs) * Predict_t - Predict_g * Predict_t * 4);
@@ -1634,18 +1663,6 @@ namespace ParbolicMotionGame.ViewModels
                 //StartTimer_Wall(sender);
                 switch (e.ActionType)
                 {
-                    //case SKTouchAction.Entered:
-                    //    //GameState Change
-                    //    GameState = (int)GameStartCondition.GameInit;
-                    //
-                    //    StartTimer(sender);
-                    //    game_touch_enable = true;
-                    //
-                    //    //copy git
-                    //    e.Handled = true;
-                    //    //TouchMotion Wait?
-                    //    EndWaitTime(5000);
-                    //    break;
                     case SKTouchAction.Moved:
                         Init_x = e.Location.X;
                         Init_y = e.Location.Y;
@@ -1682,22 +1699,25 @@ namespace ParbolicMotionGame.ViewModels
                         BlockRotationCnt = 0;
                         cnt_gameplayrender = 0;
 
+                        game_touch_enable = false;
+                        TouchOnOff = false;
+
                         // GameState Change
                         GameState = (int)GameStartCondition.GamePlay;
                         break;
                 }
 
-                if (timer_stop_PN)
-                {
-                    game_touch_enable = false;
-                    TouchOnOff = false;
-                    //timer_stop_wall();
-                    time_interval = 5;  //skcanvas redraw time 
-                    //StartTimer(sender); //Make SK Graphics
-
-                    // // GameState Change
-                    // GameState = (int)GameStartCondition.GamePlay;
-                }
+                //  if (timer_stop_PN)
+                //  {
+                //      game_touch_enable = false;
+                //      TouchOnOff = false;
+                //      //timer_stop_wall();
+                //      //time_interval = 5;  //skcanvas redraw time 
+                //      //StartTimer(sender); //Make SK Graphics
+                //  
+                //      // // GameState Change
+                //      // GameState = (int)GameStartCondition.GamePlay;
+                //  }
                 //copy git
                 e.Handled = true;
             }
@@ -1890,7 +1910,7 @@ namespace ParbolicMotionGame.ViewModels
         {
                         
             //enable_rendering = true;
-            for (int i = 0; i < cnt_rendering; i++)
+            for (int i = 0; i <= cnt_rendering; i++)
             {
                 x_rendering[i] = 0f;
                 y_rendering[i] = 0f;
@@ -1899,7 +1919,7 @@ namespace ParbolicMotionGame.ViewModels
             /*
              *  reset Setting
              */
-            //cnt_gameplayrender = 0;
+            cnt_gameplayrender = 0;
             //BlockRotationCnt = 0;
             //parabolic_cnt = 0;
             //time_interval = 0;
@@ -1936,7 +1956,7 @@ namespace ParbolicMotionGame.ViewModels
                 drag_onoff = true; //Initial x,y 
                 Init_x = 0;
                 Init_y = 0;
-
+                GameState = (int)GameStartCondition.GameEnd;
                 //Init rect_pn
                 switch(LEVEL)
                 {
@@ -1946,8 +1966,7 @@ namespace ParbolicMotionGame.ViewModels
                             //rect_pn = false -> block destory
                             if (!rect_pn[j])
                             {
-                                //game_over = false;
-                                GameState = (int)GameStartCondition.GameEnd;
+                                GameState = (int)GameStartCondition.GameInit;
                             }
                             rect_pn[j] = true;
                         }
@@ -1959,8 +1978,7 @@ namespace ParbolicMotionGame.ViewModels
                             {
                                 if (!rect_pn[i + j * 4])
                                 {
-                                    //game_over = false;
-                                    GameState = (int)GameStartCondition.GameEnd;
+                                    GameState = (int)GameStartCondition.GameInit;
                                 }
                                 rect_pn[i + j * 4] = true;
                             }
@@ -1973,8 +1991,7 @@ namespace ParbolicMotionGame.ViewModels
                             {
                                 if (!rect_pn[i + j * 4])
                                 {
-                                    //game_over = false;
-                                    GameState = (int)GameStartCondition.GameEnd;
+                                    GameState = (int)GameStartCondition.GameInit;
                                 }
                                 rect_pn[i + j * 4] = true;
                             }
@@ -1987,8 +2004,7 @@ namespace ParbolicMotionGame.ViewModels
                             {
                                 if (!rect_pn[i + j * 4])
                                 {
-                                    //game_over = false;
-                                    GameState = (int)GameStartCondition.GameEnd;
+                                    GameState = (int)GameStartCondition.GameInit;
                                 }
                                 rect_pn[i + j * 4] = true;
                             }
@@ -2001,8 +2017,7 @@ namespace ParbolicMotionGame.ViewModels
                             {
                                 if (!rect_pn[i + j * 4])
                                 {
-                                    //game_over = false;
-                                    GameState = (int)GameStartCondition.GameEnd;
+                                    GameState = (int)GameStartCondition.GameInit;
                                 }
                                 rect_pn[i + j * 4] = true;
                             }
@@ -2014,11 +2029,6 @@ namespace ParbolicMotionGame.ViewModels
             }
             Game_power = 0;
             Game_rad = 0;
-
-
-            //Add : For rendering
-            //StartTimer(sender);
-            //canvas.Clear();
 
             cnt_rendering = 0;
             enable_rendering = false;
@@ -2041,6 +2051,7 @@ namespace ParbolicMotionGame.ViewModels
             {
                 Game_level++;
                 wallupdown = true;
+                game_touch_enable = true;
                 ((SKCanvasView)sender).InvalidateSurface();
             }
 
@@ -2197,14 +2208,16 @@ namespace ParbolicMotionGame.ViewModels
             Game_level = 1;
             Game_power = 0;
             Game_rad = 0;
-            game_start_touch_enable = true;
+            game_touch_enable = true;
+            GameInitOnOff = true;
             Game_Btn_Visible = false;
-            Game_Btn_Enable = true;
+            Game_Btn_Enable = false;
             cnt_defencewallrendering_1 = 0;
             cnt_defencewallrendering_2 = 0;
             cnt_defencewallrendering_3 = 0;
             cnt_defencewallrendering_4 = 0;
             cnt_defencewallrendering_5 = 0;
+            GameState = (int)GameStartCondition.GameTitle;
             //((MainPage)sender).CanvasView3_Invalidate();
         }
 
