@@ -1,14 +1,16 @@
 # ParabolicMotionGame
 
 ## Update Plan ##
-Studying DB...
-And DB additional work is scheduled
+1. DefenceWall Motion Add plan
+2. Game Logic Change plan
+3. Game Record Ranking Add plan
 
 ## Algorithm ##
 1. Parabolic Motion 
 2. Timer
 3. ball hit wall Motion
 4. Predict Ball Motion
+5. REST API : DB OK
 
 # Game Play #
 LEVEL 1
