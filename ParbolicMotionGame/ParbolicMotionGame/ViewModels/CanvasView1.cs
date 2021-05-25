@@ -1017,8 +1017,8 @@ namespace ParbolicMotionGame.ViewModels
                     }
                     break;
                 case 2:
-                    if (wall_pn[1] != true && x >= (defencewall_1_x[0] - ballsize) * info.Width &&
-                        x <= (defencewall_1_x[0] + ballsize*2) * info.Width && y >= defencewall_2_y[0] * info.Height
+                    if (wall_pn[1] != true && x >= (defencewall_2_x[0] - ballsize) * info.Width &&
+                        x <= (defencewall_2_x[0] + ballsize*2) * info.Width && y >= defencewall_2_y[0] * info.Height
                         && y <= defencewall_2_y[1] * info.Height)
                     {
                         wall_pn[1] = true;
