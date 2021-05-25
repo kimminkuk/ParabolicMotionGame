@@ -91,7 +91,7 @@ namespace ParbolicMotionGame.ViewModels
         float[] defencewall_5_x_1 = new float[2] { 0.75f, 0.76f };
         float[] defencewall_5_x_2 = new float[2] { 0.75f, 0.76f };
         float[] defencewall_5_y_1 = new float[2] { 0.15f, 0.4f };
-        float[] defencewall_5_y_2 = new float[2] { 0.6f, 0.9f };
+        float[] defencewall_5_y_2 = new float[2] { 0.6f, 0.8f };
 
         float ballsize = 0.01f;
         bool wallupdown = true;
@@ -121,10 +121,10 @@ namespace ParbolicMotionGame.ViewModels
         bool game_Btn_Enable = false;
         bool game_touch_enable = false;
         bool game_start_touch_enable = false;
-        bool gameDebugLevelUp_Visble = false; //Debug -> true, default : false
-        bool gameDebugLevelDown_Visble = false;
-        bool gameDebugLevelUp_Enable = false;
-        bool gameDebugLevelDown_Enable = false;
+        bool gameDebugLevelUp_Visble = true; //Debug -> true, default : false
+        bool gameDebugLevelDown_Visble = true;
+        bool gameDebugLevelUp_Enable = true;
+        bool gameDebugLevelDown_Enable = true;
         bool gameStartTitle_Visible = false;
         bool gameStartTitle_Enable = false;
         bool GameInitOnOff = true;
@@ -835,13 +835,13 @@ namespace ParbolicMotionGame.ViewModels
                     case 1:
                         if (wall_pn[0])
                         {
-                            x = (float)0.59 * info.Width + ((float)0.59 * info.Width - x);
+                            x = (defencewall_1_x[0]-ballsize) * info.Width + ((defencewall_1_x[0] - ballsize) * info.Width - x);
                         }
                         break;
                     case 2:
                         if (wall_pn[1])
                         {
-                            x = (float)0.54 * info.Width + ((float)0.54 * info.Width - x);
+                            x = (defencewall_2_x[0] - ballsize) * info.Width + ((defencewall_2_x[0] - ballsize) * info.Width - x);
                         }
                         break;
                     case 3:
@@ -853,21 +853,21 @@ namespace ParbolicMotionGame.ViewModels
                     case 4:
                         if (wall_pn[3])
                         {
-                            x = (float)0.59 * info.Width + ((float)0.59 * info.Width - x);
+                            x = (defencewall_4_x_1[0] - ballsize) * info.Width + ((defencewall_4_x_1[0] - ballsize) * info.Width - x);
                         }
-                        if (wall_pn_sub[3] != true && x >= (float)0.74 * info.Width &&
-                            x <= (float)0.745 * info.Width && y >= (float)0.15 * info.Height
-                            && y <= (float)0.6 * info.Height)
+                        if (wall_pn_sub[3] != true && x >= (defencewall_4_x_2[0]-ballsize) * info.Width &&
+                            x <= (defencewall_4_x_2[0] + ballsize) * info.Width && y >= defencewall_4_y_2[0] * info.Height
+                            && y <= defencewall_4_y_2[1] * info.Height)
                         {
                             wall_pn_sub[3] = true;
                             wall_pn[3] = false;
                         }
                         if (wall_pn_sub[3])
                         {
-                            x = (float)0.74 * info.Width + ((float)0.74 * info.Width - x);
+                            x = (defencewall_4_x_2[0] - ballsize) * info.Width + ((defencewall_4_x_2[0] - ballsize) * info.Width - x);
 
-                            if (wall_pn_Level4_main[1] != 1 && x >= (float)0.61 * info.Width && x <= (float)0.615 * info.Width
-                                && y >= (float)0.1 * info.Height && y <= (float)0.55 * info.Height)
+                            if (wall_pn_Level4_main[1] != 1 && x >= (defencewall_4_x_1[0]+ballsize) * info.Width && x <= (defencewall_4_x_1[0] + ballsize*2) * info.Width
+                                && y >= defencewall_4_y_1[0] * info.Height && y <= defencewall_4_y_1[1] * info.Height)
                             {
                                 wall_pn_Level4_main[1] = 1;
                             }
@@ -880,8 +880,8 @@ namespace ParbolicMotionGame.ViewModels
                             x = (float)(Vo_test * control_rcos_abs) * t + Init_x - 0.3f * info.Width;
                             wall_pn_sub[3] = false;
 
-                            if (x >= (float)0.74 * info.Width && x <= (float)0.745 * info.Width
-                                && y >= (float)0.15 * info.Height && y <= (float)0.6 * info.Height)
+                            if (x >= (defencewall_4_x_2[0] - ballsize) * info.Width && x <= (defencewall_4_x_2[0]) * info.Width
+                                && y >= defencewall_4_y_2[0] * info.Height && y <= defencewall_4_y_2[1] * info.Height)
                             {
                                 wall_pn_sub[3] = true;
                                 wall_pn[3] = false;
@@ -893,7 +893,7 @@ namespace ParbolicMotionGame.ViewModels
                     case 5:
                         if (wall_pn[4])
                         {
-                            x = (float)0.74 * info.Width + ((float)0.74 * info.Width - x);
+                            x = (defencewall_5_x_1[0]-ballsize) * info.Width + ((defencewall_5_x_1[0] - ballsize) * info.Width - x);
                         }
                         break;
                     default:
@@ -1009,78 +1009,78 @@ namespace ParbolicMotionGame.ViewModels
             switch (LEVEL)
             {
                 case 1:
-                    if (wall_pn[0] != true && x >= (float)0.59 * info.Width &&
-                        x <= (float)0.60 * info.Width && y >= (float)0.2 * info.Height
-                        && y <= (float)0.8 * info.Height)
+                    if (wall_pn[0] != true && x >= (defencewall_1_x[0]-ballsize) * info.Width &&
+                        x <= (defencewall_1_x[1] - ballsize) * info.Width && y >= defencewall_1_y[0] * info.Height
+                        && y <= defencewall_1_y[1] * info.Height)
                     {
                         wall_pn[0] = true;
                     }
                     break;
                 case 2:
-                    if (wall_pn[1] != true && x >= (float)0.55 * info.Width &&
-                        x <= (float)0.57 * info.Width && y >= (float)0.15 * info.Height
-                        && y <= (float)0.7 * info.Height)
+                    if (wall_pn[1] != true && x >= (defencewall_1_x[0] - ballsize) * info.Width &&
+                        x <= (defencewall_1_x[0] + ballsize*2) * info.Width && y >= defencewall_2_y[0] * info.Height
+                        && y <= defencewall_2_y[1] * info.Height)
                     {
                         wall_pn[1] = true;
                     }
                     break;
                 case 3:
-                    if (wall_pn[2] != true && x >= (float)0.5 * info.Width &&
-                        x <= (float)0.52 * info.Width && y >= (float)0.15 * info.Height
-                        && y <= (float)0.20 * info.Height)
+                    if (wall_pn[2] != true && x >= (defencewall_3_x[0]-ballsize) * info.Width &&
+                        x <= (defencewall_3_x[0] + ballsize*2) * info.Width && y >= defencewall_3_y[0] * info.Height
+                        && y <= (defencewall_3_y[0] / 10 + defencewall_3_y[0]) * info.Height)
                     {
                         wall_pn[2] = true;
-                        xpos_mirror = (float)(0.51-0.01);
+                        xpos_mirror = (defencewall_3_x[0] - ballsize);
                     }
-                    else if (wall_pn[2] != true && x >= (float)0.52 * info.Width &&
-                        x <= (float)0.54 * info.Width && y >= (float)0.20 * info.Height
-                        && y <= (float)0.25 * info.Height)
+                    else if (wall_pn[2] != true && x >= (defencewall_3_x[0] + ballsize) * info.Width &&
+                        x <= (defencewall_3_x[0] + ballsize * 3) * info.Width && y >= defencewall_3_y[0] * info.Height
+                        && y <= (defencewall_3_y[0] / 10 + defencewall_3_y[0]) * info.Height)
                     {
                         wall_pn[2] = true;
-                        xpos_mirror = (float)0.53;
+                        xpos_mirror = (defencewall_3_x[0] + ballsize);
                     }
-                    else if (wall_pn[2] != true && x >= (float)0.54 * info.Width &&
-                        x <= (float)0.56 * info.Width && y >= (float)0.25 * info.Height
-                        && y <= (float)0.4 * info.Height)
+                    else if (wall_pn[2] != true && x >= (defencewall_3_x[0] + ballsize * 4) * info.Width &&
+                        x <= (defencewall_3_x[0] + ballsize * 6) * info.Width && y >= (defencewall_3_y[0] / 10 + defencewall_3_y[0]) * info.Height
+                        && y <= ((defencewall_3_y[0]*2) / 10 + defencewall_3_y[0]) * info.Height)
 
                     {
                         wall_pn[2] = true;
-                        xpos_mirror = (float)0.55;
+                        xpos_mirror = (defencewall_3_x[0] + ballsize * 4);
                     }
-                    else if (wall_pn[2] != true && x >= (float)0.58 * info.Width &&
-                        x <= (float)0.60 * info.Width && y >= (float)0.4 * info.Height
-                        && y <= (float)0.55 * info.Height)
+                    else if (wall_pn[2] != true && x >= (defencewall_3_x[0] + ballsize * 7) * info.Width &&
+                        x <= (defencewall_3_x[0] + ballsize * 10) * info.Width && y >= ((defencewall_3_y[0]*2) / 10 + defencewall_3_y[0]) * info.Height
+                        && y <= ((defencewall_3_y[0] * 3) / 10 + defencewall_3_y[0]) * info.Height)
                     {
                         wall_pn[2] = true;
-                        xpos_mirror = (float)0.57;
+                        xpos_mirror = (defencewall_3_x[0] + ballsize * 7);
                     }
-                    else if (wall_pn[2] != true && x >= (float)0.60 * info.Width &&
-                        x <= (float)0.62 * info.Width && y >= (float)0.55 * info.Height
-                        && y <= (float)0.7 * info.Height)
+                    else if (wall_pn[2] != true && x >= (defencewall_3_x[0] + ballsize * 10) * info.Width &&
+                        x <= (defencewall_3_x[0] + ballsize * 12) * info.Width && y >= ((defencewall_3_y[0] * 3) / 10 + defencewall_3_y[0]) * info.Height
+                        && y <= ((defencewall_3_y[0] * 4) / 10 + defencewall_3_y[0]) * info.Height)
                     {
                         wall_pn[2] = true;
-                        xpos_mirror = (float)0.59;
+                        xpos_mirror = (defencewall_3_x[0] + ballsize * 10);
                     }
                     break;
 
                 case 4:
-                    if (wall_pn[3] != true && x >= (float)0.6 * info.Width &&
-                        x <= (float)0.605 * info.Width && y >= (float)0.1 * info.Height
-                        && y <= (float)0.55 * info.Height)
+                    if (wall_pn[3] != true && x >= (defencewall_4_x_1[0]-ballsize) * info.Width &&
+                        x <= (defencewall_4_x_1[0] + ballsize) * info.Width && y >= defencewall_4_y_1[0] * info.Height
+                        && y <= defencewall_4_y_1[1] * info.Height)
                     {
                         wall_pn[3] = true;
                     }
                     break;
                 case 5:
-                    if (wall_pn[4] != true && x >= (float)0.75 * info.Width 
-                        && x <= (float)0.76 * info.Width) 
+                    if (wall_pn[4] != true && x >= (defencewall_5_x_1[0]-ballsize) * info.Width 
+                        && x <= (defencewall_5_x_1[0] + ballsize) * info.Width) 
                     {
                         //y좌표가 0~0.2info.height, 0.4~0.6만 통과한다.
-                        if ( y >= (float)0.6 * info.Height && y <= (float)0.9 * info.Height )
+                        if ( y >= defencewall_5_y_2[0] * info.Height && y <= defencewall_5_y_2[1] * info.Height )
                         {
                             wall_pn[4] = true;
                         }
-                        if( y >= (float)0.15 * info.Height && y <= (float)0.4 * info.Height )
+                        if( y >= defencewall_5_y_1[0] * info.Height && y <= defencewall_5_y_1[1] * info.Height )
                         {
                             wall_pn[4] = true;
                         }
@@ -2297,7 +2297,6 @@ namespace ParbolicMotionGame.ViewModels
                         {
                             defencewall_1_y[1] = 0.8f - 0.002f * (cnt_defencewallrendering_1);
                             defencewall_1_y[0] = 0.2f - 0.002f * (cnt_defencewallrendering_1);
-                            //defencewall_1_y[1] = 0.8f - 0.002f * (cnt_defencewallrendering_1);
                             if (cnt_defencewallrendering_1 >= 99)
                             {
                                 wallupdown = false;
@@ -2308,7 +2307,6 @@ namespace ParbolicMotionGame.ViewModels
                         {
                             defencewall_1_y[1] = 0.602f + 0.002f * (cnt_defencewallrendering_1);
                             defencewall_1_y[0] = 0.002f + 0.002f * (cnt_defencewallrendering_1);
-                            //defencewall_1_y[1] = 0.602f + 0.002f * (cnt_defencewallrendering_1);
                             if (cnt_defencewallrendering_1 >= 99)
                             {
                                 wallupdown = true;
@@ -2320,9 +2318,9 @@ namespace ParbolicMotionGame.ViewModels
                         cnt_defencewallrendering_2++;
                         if (wallupdown) // up
                         {
-                            defencewall_2_y[0] = defencewall_2_y[0] - 0.0015f * (cnt_defencewallrendering_2);
-                            defencewall_2_y[1] = defencewall_2_y[1] - 0.0015f * (cnt_defencewallrendering_2);
-                            if (cnt_defencewallrendering_2 == 99)
+                            defencewall_2_y[0] = 0.15f - 0.0015f * (cnt_defencewallrendering_2);
+                            defencewall_2_y[1] = 0.7f - 0.0015f * (cnt_defencewallrendering_2);
+                            if (cnt_defencewallrendering_2 >= 99)
                             {
                                 wallupdown = false;
                                 cnt_defencewallrendering_2 = 0;
@@ -2330,9 +2328,9 @@ namespace ParbolicMotionGame.ViewModels
                         }
                         else //down
                         {
-                            defencewall_2_y[0] = defencewall_2_y[0] + 0.0015f * (cnt_defencewallrendering_2);
-                            defencewall_2_y[1] = defencewall_2_y[1] + 0.0015f * (cnt_defencewallrendering_2);
-                            if (cnt_defencewallrendering_2 == 99)
+                            defencewall_2_y[0] = 0.0015f * (cnt_defencewallrendering_2);
+                            defencewall_2_y[1] = 0.55f + 0.0015f * (cnt_defencewallrendering_2);
+                            if (cnt_defencewallrendering_2 >= 99)
                             {
                                 wallupdown = true;
                                 cnt_defencewallrendering_2 = 0;
@@ -2343,11 +2341,11 @@ namespace ParbolicMotionGame.ViewModels
                         cnt_defencewallrendering_3++;
                         if (wallupdown) // up
                         {
-                            defencewall_3_x[0] = defencewall_3_x[0] - 0.0015f * (cnt_defencewallrendering_3);
-                            defencewall_3_x[1] = defencewall_3_x[1] - 0.0015f * (cnt_defencewallrendering_3);
-                            defencewall_3_y[0] = defencewall_3_y[0] - 0.0015f * (cnt_defencewallrendering_3);
-                            defencewall_3_y[1] = defencewall_3_y[1] - 0.0015f * (cnt_defencewallrendering_3);
-                            if (cnt_defencewallrendering_3 == 99)
+                            defencewall_3_x[0] = 0.5f - 0.0015f * (cnt_defencewallrendering_3);
+                            defencewall_3_x[1] = 0.7f - 0.0015f * (cnt_defencewallrendering_3);
+                            defencewall_3_y[0] = 0.15f - 0.0015f * (cnt_defencewallrendering_3);
+                            defencewall_3_y[1] = 0.75f - 0.0015f * (cnt_defencewallrendering_3);
+                            if (cnt_defencewallrendering_3 >= 99)
                             {
                                 wallupdown = false;
                                 cnt_defencewallrendering_3 = 0;
@@ -2355,11 +2353,11 @@ namespace ParbolicMotionGame.ViewModels
                         }
                         else //down
                         {
-                            defencewall_3_x[0] = defencewall_3_x[0] + 0.0015f * (cnt_defencewallrendering_3);
-                            defencewall_3_x[1] = defencewall_3_x[1] + 0.0015f * (cnt_defencewallrendering_3);
-                            defencewall_3_y[0] = defencewall_3_y[0] + 0.0015f * (cnt_defencewallrendering_3);
-                            defencewall_3_y[1] = defencewall_3_y[1] + 0.0015f * (cnt_defencewallrendering_3);
-                            if (cnt_defencewallrendering_3 == 99)
+                            defencewall_3_x[0] = 0.35f + 0.0015f * (cnt_defencewallrendering_3);
+                            defencewall_3_x[1] = 0.55f + 0.0015f * (cnt_defencewallrendering_3);
+                            defencewall_3_y[0] = 0.0015f * (cnt_defencewallrendering_3);
+                            defencewall_3_y[1] = 0.6f + 0.0015f * (cnt_defencewallrendering_3);
+                            if (cnt_defencewallrendering_3 >= 99)
                             {
                                 wallupdown = true;
                                 cnt_defencewallrendering_3 = 0;
@@ -2372,14 +2370,14 @@ namespace ParbolicMotionGame.ViewModels
                         if (wallupdown) // up
                         {
                             //main wall
-                            defencewall_4_y_1[0] = defencewall_4_y_1[0] - 0.001f * (cnt_defencewallrendering_4);
-                            defencewall_4_y_1[1] = defencewall_4_y_1[1] - 0.001f * (cnt_defencewallrendering_4);
+                            defencewall_4_y_1[0] = 0.1f - 0.001f * (cnt_defencewallrendering_4);
+                            defencewall_4_y_1[1] = 0.55f - 0.001f * (cnt_defencewallrendering_4);
 
                             //sub wall
-                            defencewall_4_y_2[0] = defencewall_4_y_2[0] - 0.001f * (cnt_defencewallrendering_4);
-                            defencewall_4_y_2[1] = defencewall_4_y_2[1] - 0.001f * (cnt_defencewallrendering_4);
+                            defencewall_4_y_2[0] = 0.15f + 0.001f * (cnt_defencewallrendering_4);
+                            defencewall_4_y_2[1] = 0.6f + 0.001f * (cnt_defencewallrendering_4);
 
-                            if (cnt_defencewallrendering_4 == 99)
+                            if (cnt_defencewallrendering_4 >= 99)
                             {
                                 wallupdown = false;
                                 cnt_defencewallrendering_4 = 0;
@@ -2388,14 +2386,14 @@ namespace ParbolicMotionGame.ViewModels
                         else //down
                         {
                             //main
-                            defencewall_4_y_1[0] = defencewall_4_y_1[0] + 0.001f * (cnt_defencewallrendering_4);
-                            defencewall_4_y_1[1] = defencewall_4_y_1[1] + 0.001f * (cnt_defencewallrendering_4);
+                            defencewall_4_y_1[0] = 0.001f * (cnt_defencewallrendering_4);
+                            defencewall_4_y_1[1] = 0.45f + 0.001f * (cnt_defencewallrendering_4);
 
                             //sub wall
-                            defencewall_4_y_2[0] = defencewall_4_y_2[0] - 0.001f * (cnt_defencewallrendering_4);
-                            defencewall_4_y_2[1] = defencewall_4_y_2[1] - 0.001f * (cnt_defencewallrendering_4);
+                            defencewall_4_y_2[0] = 0.25f - 0.001f * (cnt_defencewallrendering_4);
+                            defencewall_4_y_2[1] = 0.7f - 0.001f * (cnt_defencewallrendering_4);
 
-                            if (cnt_defencewallrendering_4 == 99)
+                            if (cnt_defencewallrendering_4 >= 99)
                             {
                                 wallupdown = true;
                                 cnt_defencewallrendering_4 = 0;
@@ -2405,48 +2403,50 @@ namespace ParbolicMotionGame.ViewModels
 
                     case 5:
                         cnt_defencewallrendering_5++;
-                        if (wallupdown) // up,left
+                        if (wallupdown)
                         {
-                            //Only: Up
+                            //Main Wall : Left Motion
+                            //Sub Wall : Right Motion
                             if (cnt_defencewallrendering_5 <= 49)
                             {
-                                defencewall_5_y_1[0] = defencewall_5_y_1[0] - 0.0015f * (cnt_defencewallrendering_5);
-                                defencewall_5_y_1[1] = defencewall_5_y_1[1] - 0.0015f * (cnt_defencewallrendering_5);
-                                defencewall_5_y_2[0] = defencewall_5_y_2[0] - 0.0015f * (cnt_defencewallrendering_5);
-                                defencewall_5_y_2[1] = defencewall_5_y_2[1] - 0.0015f * (cnt_defencewallrendering_5);
+                                defencewall_5_x_1[0] = 0.75f - 0.005f * (cnt_defencewallrendering_5);
+                                defencewall_5_x_2[0] = 0.75f + 0.002f * (cnt_defencewallrendering_5);
                             }
-                            else //Only: Left
+                            else
+                            //Main Wall : Down Motion
+                            //Sub Wall : Down Motion
                             {
-                                defencewall_5_x_1[0] = defencewall_5_x_1[0] - 0.0015f * (cnt_defencewallrendering_5 - 48);
-                                defencewall_5_x_1[1] = defencewall_5_x_1[1] - 0.0015f * (cnt_defencewallrendering_5 - 48);
-                                defencewall_5_x_2[0] = defencewall_5_x_2[0] - 0.0015f * (cnt_defencewallrendering_5 - 48);
-                                defencewall_5_x_2[1] = defencewall_5_x_2[1] - 0.0015f * (cnt_defencewallrendering_5 - 48);
+                                defencewall_5_y_1[0] = 0.15f + 0.006f * (cnt_defencewallrendering_5- 49);
+                                defencewall_5_y_1[1] = 0.4f + 0.006f * (cnt_defencewallrendering_5 - 49);
+                                defencewall_5_y_2[0] = 0.6f + 0.003f * (cnt_defencewallrendering_5 - 49);
+                                defencewall_5_y_2[1] = 0.8f + 0.003f * (cnt_defencewallrendering_5 - 49);
                             }
 
-                            if (cnt_defencewallrendering_5 == 99)
+                            if (cnt_defencewallrendering_5 >= 99)
                             {
                                 wallupdown = false;
                                 cnt_defencewallrendering_5 = 0;
                             }
                         }
-                        else //down,right
+                        else
                         {
-                            //Only: Down
                             if (cnt_defencewallrendering_5 <= 49)
+                            //Main Wall : Right Motion
+                            //Sub Wall : Left Motion
                             {
-                                defencewall_5_y_1[0] = defencewall_5_y_1[0] + 0.0015f * (cnt_defencewallrendering_5);
-                                defencewall_5_y_1[1] = defencewall_5_y_1[1] + 0.0015f * (cnt_defencewallrendering_5);
-                                defencewall_5_y_2[0] = defencewall_5_y_2[0] + 0.0015f * (cnt_defencewallrendering_5);
-                                defencewall_5_y_2[1] = defencewall_5_y_2[1] + 0.0015f * (cnt_defencewallrendering_5);
+                                defencewall_5_x_1[0] = 0.5f + 0.005f * (cnt_defencewallrendering_5);
+                                defencewall_5_x_2[0] = 0.85f - 0.002f * (cnt_defencewallrendering_5);
                             }
-                            else //Only: Right
+                            else
+                            //Main Wall : Up Motion
+                            //Sub Wall : Up Motion
                             {
-                                defencewall_5_x_1[0] = defencewall_5_x_1[0] + 0.0015f * (cnt_defencewallrendering_5 - 48);
-                                defencewall_5_x_1[1] = defencewall_5_x_1[1] + 0.0015f * (cnt_defencewallrendering_5 - 48);
-                                defencewall_5_x_2[0] = defencewall_5_x_2[0] + 0.0015f * (cnt_defencewallrendering_5 - 48);
-                                defencewall_5_x_2[1] = defencewall_5_x_2[1] + 0.0015f * (cnt_defencewallrendering_5 - 48);
+                                defencewall_5_y_1[0] = 0.45f - 0.006f * (cnt_defencewallrendering_5 - 49);
+                                defencewall_5_y_1[1] = 0.7f - 0.006f * (cnt_defencewallrendering_5 - 49);
+                                defencewall_5_y_2[0] = 0.75f - 0.003f * (cnt_defencewallrendering_5 - 49);
+                                defencewall_5_y_2[1] = 0.95f - 0.003f * (cnt_defencewallrendering_5 - 49);
                             }
-                            if (cnt_defencewallrendering_5 == 99)
+                            if (cnt_defencewallrendering_5 >= 99)
                             {
                                 wallupdown = true;
                                 cnt_defencewallrendering_5 = 0;
