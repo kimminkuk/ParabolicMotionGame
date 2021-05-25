@@ -13,6 +13,12 @@
 5. REST API : DB OK
 
 # Game Play #
+WALL MOTION UPDATE
+
+https://user-images.githubusercontent.com/27074717/119509974-15a39a00-bdac-11eb-989f-76a4f4f883d1.mp4
+
+
+
 LEVEL 1
 
 https://user-images.githubusercontent.com/27074717/115561824-e43d3780-a2f0-11eb-91c4-e6c038bf1bec.mp4
