@@ -18,6 +18,7 @@ namespace ParbolicMotionGame.RankingPage
         readonly IList<ParabolicDB> parabolicDBs = new ObservableCollection<ParabolicDB>();
         public GameRankingPage(object sender, EventArgs e)
         {
+            BindingContext = parabolicDBs;
             InitializeComponent();
 
             //RankingView(sender , e);
@@ -94,7 +95,7 @@ namespace ParbolicMotionGame.RankingPage
                 var GameDBCollection = await parabolicDBManager.GetAll();
                 foreach (ParabolicDB ItemDB in GameDBCollection)
                 {
-                    if (parabolicDBs.All(a => a.LevelParabolic_class != ItemDB.ScoreParabolic_class))
+                    if (parabolicDBs.All(a => a.IdParabolic_class != ItemDB.IdParabolic_class))
                     {
                         parabolicDBs.Add(ItemDB);
                     }
@@ -121,7 +122,7 @@ namespace ParbolicMotionGame.RankingPage
                 var GameDBCollection = await parabolicDBManager.GetAll();
                 foreach (ParabolicDB ItemDB in GameDBCollection)
                 {
-                    if (parabolicDBs.All(a => a.LevelParabolic_class != ItemDB.ScoreParabolic_class))
+                    if (parabolicDBs.All(a => a.IdParabolic_class != ItemDB.IdParabolic_class))
                     {
                         parabolicDBs.Add(ItemDB);
                     }
