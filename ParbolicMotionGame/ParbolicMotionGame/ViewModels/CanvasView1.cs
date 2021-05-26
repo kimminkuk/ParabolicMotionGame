@@ -2145,7 +2145,7 @@ namespace ParbolicMotionGame.ViewModels
             {
                 rect_pn[j] = true;
             }
-            parabolics.LevelPrabolic_class = Game_level;
+            parabolics.LevelParabolic_class = Game_level;
             parabolics.ScoreParabolic_class = Game_score;
             Game_score = 0;
             Game_level = 1;
@@ -2173,7 +2173,7 @@ namespace ParbolicMotionGame.ViewModels
             {
                 rect_pn[j] = true;
             }
-            parabolics.LevelPrabolic_class = Game_level;
+            parabolics.LevelParabolic_class = Game_level;
             parabolics.ScoreParabolic_class = Game_score;
             Game_score = 0;
             Game_level = 1;
@@ -2202,7 +2202,7 @@ namespace ParbolicMotionGame.ViewModels
             {
                 rect_pn[j] = true;
             }
-            parabolics.LevelPrabolic_class = Game_level;
+            parabolics.LevelParabolic_class = Game_level;
             parabolics.ScoreParabolic_class = Game_score;
             Game_score = 0;
             Game_level = 1;
@@ -2508,11 +2508,11 @@ namespace ParbolicMotionGame.ViewModels
                 //}
             });
         }
-        private async void EndWaitTime(int WaitTime)
+        public async void EndWaitTime(int WaitTime)
         {
             await Task.Delay(WaitTime);
         }
-        private void timer_stop()
+        public void timer_stop()
         {
             timer_.Dispose();
         }

@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ParbolicMotionGame.RankingPage.GameRankingPage">
+
+    <StackLayout>
+        <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="9*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.RowSpan="11" Grid.Column="1" Grid.ColumnSpan="8">
+            <ListView ItemsSource="{Binding}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                            <TextCell Text="{Binding NameParabolic_class}" Detail="{Binding LevelParabolic_class}">
+                        </TextCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+        <Button Text="Renew" FontSize="24" FontFamily="Yet R"
+                x:Name="RankingPageUpdate_btn"
+                HorizontalOptions="Fill"
+                Grid.Row="0" Grid.Column="0"
+                Clicked="RankingUpdate_Clicked"
+                TextColor="Black"/>
+    </Grid>
+    </StackLayout>
+</ContentPage>

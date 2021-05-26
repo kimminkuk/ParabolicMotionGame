@@ -23,6 +23,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <Grid BackgroundColor="LightGoldenrodYellow" Grid.Row="0" Grid.ColumnSpan="8"/>
@@ -71,7 +72,21 @@
                         NumberOfTapsRequired="1"/>
                 </Label.GestureRecognizers>
             </Label>
-            
+
+            <Label Text="RANK" FontSize="24"
+                   TextColor="White"
+                   VerticalOptions="Center"
+                   Grid.Row="0" Grid.Column="9"
+                   HorizontalOptions="FillAndExpand"
+                   BackgroundColor="DarkSlateBlue"
+                   FontFamily="Yet R">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Tapped="OnTapRankingBoardPage"
+                        NumberOfTapsRequired="1"/>
+                </Label.GestureRecognizers>
+            </Label>
+
             <Button Text="continue?" FontSize="24" FontFamily="Yet R"
                     x:Name="gamecontinue_btn"
                     HorizontalOptions="Fill"
@@ -104,13 +119,11 @@
 
             <skia:SKCanvasView x:Name="CanvasView"
                                PaintSurface="CanvasView_PaintSurface"
-                               EnableTouchEvents="{Binding Game_touch_enable}"
-                               
-                               Touch="CanvasView_Touch"       
-
+                               EnableTouchEvents="{Binding Game_touch_enable}"               
+                               Touch="CanvasView_Touch"
                                Grid.Row="1"
                                Grid.RowSpan="2"
-                               Grid.ColumnSpan="9">
+                               Grid.ColumnSpan="10">
             </skia:SKCanvasView>
 
             <skia:SKCanvasView x:Name="CanvasView2"

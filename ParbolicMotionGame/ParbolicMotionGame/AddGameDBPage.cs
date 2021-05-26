@@ -33,9 +33,9 @@ namespace ParbolicMotionGame
                         }),
                         (LevelCell = new EntryCell {
                             Label = "Level",
-                            Placeholder = existingPara.LevelPrabolic_class.ToString(),
+                            Placeholder = existingPara.LevelParabolic_class.ToString(),
                             IsEnabled = false,
-                            Text = existingPara.LevelPrabolic_class.ToString(),
+                            Text = existingPara.LevelParabolic_class.ToString(),
                         }),
                         (ScoreCell = new EntryCell {
                             Label = "Score",

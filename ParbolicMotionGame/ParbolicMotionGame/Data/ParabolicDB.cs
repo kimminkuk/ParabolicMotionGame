@@ -10,7 +10,7 @@ namespace ParbolicMotionGame.Data
         public int IdParabolic_class { get; set; }
 
         [JsonProperty("LevelParabolic")]
-        public int LevelPrabolic_class { get; set; }
+        public int LevelParabolic_class { get; set; }
         [JsonProperty("ScoreParabolic")]
         public int ScoreParabolic_class { get; set; }
 

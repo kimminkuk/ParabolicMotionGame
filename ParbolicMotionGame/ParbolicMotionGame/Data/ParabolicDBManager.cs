@@ -42,7 +42,7 @@ namespace ParbolicMotionGame.Data
             //(2) Date 아 스트링이네 ㅅㅂ
             ParabolicDB parabolicDB = new ParabolicDB()
             {
-                LevelPrabolic_class = LevelPrabolic_,
+                LevelParabolic_class = LevelPrabolic_,
                 ScoreParabolic_class = ScoreParabolic_,
                 NameParabolic_class = NameParabolic_,
                 DateParabolic_class = DateTime.Now,

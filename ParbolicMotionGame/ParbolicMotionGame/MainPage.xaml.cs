@@ -13,6 +13,7 @@ using Xamarin.Forms.Shapes;
 
 using ParbolicMotionGame.ViewModels;
 using ParbolicMotionGame.Data;
+using ParbolicMotionGame.RankingPage;
 using System.Collections.ObjectModel;
 
 namespace ParbolicMotionGame
@@ -98,6 +99,15 @@ namespace ParbolicMotionGame
             if (answer)
                 await Navigation.PushModalAsync(new AddGameDBPage(parabolicDBManager, parabolicDBs, parabolicDB));
             CanvasView1_Invalidate();
+        }
+
+        async private void OnTapRankingBoardPage(object sender, EventArgs e)
+        {
+            CanvasView1 canvasView1 = (CanvasView1)BindingContext;
+            //canvasView1.timer_stop();
+            await Navigation.PushModalAsync(new GameRankingPage(sender , e));
+            canvasView1.EndWaitTime(1000);
+            //canvasView1.StartTimer(sender);
         }
 
         //For Debug
