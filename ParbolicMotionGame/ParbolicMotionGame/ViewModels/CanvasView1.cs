@@ -43,7 +43,7 @@ namespace ParbolicMotionGame.ViewModels
         public int time_interval = 5;
         public bool timer_stop_PN = false;
         public bool parabolic_clear = false;
-        public int parabolic_cnt = 0;
+        public static int parabolic_cnt = 0;
         public int parabolic_pre_cnt = 0;
         public bool wall_1_pn = false;
         public bool timer_stop_PN_BlockRotation = false;
@@ -51,7 +51,7 @@ namespace ParbolicMotionGame.ViewModels
 
         //New
         const int LEVEL_MAX = 5;
-        const int pos_y_Increase = 25;
+        const int pos_y_Increase = 0;
         public bool[] wall_pn = new bool[LEVEL_MAX];
         public bool[] wall_pn_sub = new bool[LEVEL_MAX];
         public bool pos_y_ceiling_touch = false;
@@ -65,13 +65,14 @@ namespace ParbolicMotionGame.ViewModels
         public float[] x_rendering = new float[10000];
         public float[] y_rendering = new float[10000];
         int cnt_rendering = 0;
-        int cnt_gameplayrender = 0;
+        static int cnt_gameplayrender = 0;
         bool enable_rendering = false;
         float Vo_test = 0f;
         int Vo_test_Power = 1000;
         float x_width_save = 0f;
         float y_width_save = 0f;
-
+        static bool PredictDrawThreadOnOff = false;
+        float x_correction_level5 = 0f;
         /*
          *  Update : Wall Motion Rendering
          */
@@ -97,7 +98,7 @@ namespace ParbolicMotionGame.ViewModels
 
         float ballsize = 0.01f;
         bool wallupdown = true;
-        
+
         /*
          *  SKPaint : Paint List 
          */
@@ -151,13 +152,15 @@ namespace ParbolicMotionGame.ViewModels
         /*
          *  Enum 
          */
-        
+
         /*
          *  Timer : Thread?
          */
         System.Threading.Timer timer_;
         System.Threading.Timer timer_wall;
         System.Threading.Timer timer_BallWallTouch;
+        System.Threading.Thread thread_canvas;
+
 
         public CanvasView1()
         {
@@ -188,19 +191,19 @@ namespace ParbolicMotionGame.ViewModels
                     StrokeWidth = 1
                 };
                 string game_Title_text = "START TOUCH!";
-            
+
                 //Adjust TextSize property so text is 95% of screen width
                 float textWidth = textPaint.MeasureText(game_Title_text);
                 textPaint.TextSize = 0.2f * info.Width * textPaint.TextSize / textWidth;
-            
+
                 //Find the text bounds
                 SKRect textBounds = new SKRect();
                 textPaint.MeasureText(game_Title_text, ref textBounds);
-            
+
                 // Calculate offsets to Low center the text on the screen
                 float xText = info.Width / 2 - textBounds.MidX;
                 float yText = info.Height * 0.8f;
-            
+
                 //And draw the text
                 canvas.DrawText(game_Title_text, xText, yText, textPaint);
                 EndWaitTime(1000);
@@ -212,7 +215,7 @@ namespace ParbolicMotionGame.ViewModels
         {
             SKCanvas canvas = surface.Canvas; //그래픽그리기 컨텍스트
                                               //개체는 그래픽 SKCanvan 변환과 클리핑을 포함 하는 그래픽 상태를 캡슐화 합니다.
-            
+
             if (GameState == (int)GameStartCondition.GameEnd)
             {
                 canvas.Clear();
@@ -222,10 +225,10 @@ namespace ParbolicMotionGame.ViewModels
                 Gameover_textdraw(sender, surface, info);
                 return;
             }
-            else if (GameState == (int)GameStartCondition.GameInit )
+            else if (GameState == (int)GameStartCondition.GameInit)
             {
                 canvas.Clear();
-                if(game_level == 6)
+                if (game_level == 6)
                 {
                     GameClearText(sender, surface, info);
                     return;
@@ -286,9 +289,9 @@ namespace ParbolicMotionGame.ViewModels
                 }
                 else
                 {
-                   /*
-                    * x,y Position Pre-Calculate
-                    */
+                    /*
+                     * x,y Position Pre-Calculate
+                     */
                     if (!enable_rendering)
                     {
                         //PredictPostionCalculate(canvas, info, Vo_test);
@@ -483,7 +486,7 @@ namespace ParbolicMotionGame.ViewModels
                 }
                 //canvasView1에서 canvasView2의 Surface 중복해서 쓰는거 될까??
                 PaintSurface_sub(sender, surface, info);
-                
+
             }
 
             else if (GameState == (int)GameStartCondition.GamePlay)
@@ -744,24 +747,24 @@ namespace ParbolicMotionGame.ViewModels
                          * x,y Position Pre-Calculate
                          */
                         //if (cnt_gameplayrender == 0)
-                        // if((cnt_gameplayrender % 5) == 0)
-                        // {
-                        //     PredictPostionCalculate(canvas, info, Vo_test, control_rcos_abs, control_rsin_abs);
-                        // }
+                        //if((cnt_gameplayrender % 10) == 0)
+                        {
+                            PredictPostionCalculate(canvas, info, Vo_test, control_rcos_abs, control_rsin_abs);
+                        }
                         cnt_gameplayrender++;
                         GameLevelTextCanvas(Game_level, sender, surface, info);
 
                         //if (cnt_rendering >= cnt_gameplayrender)
-                        {
-                            canvas.DrawCircle(x_rendering[cnt_gameplayrender], y_rendering[cnt_gameplayrender], (float)0.01 * info.Width, paint);
-                            if (x_rendering[cnt_gameplayrender] > (float)(info.Width * 0.75))
-                            {
-                                GoalBlockDamageCount(Game_level, x_rendering[cnt_gameplayrender], y_rendering[cnt_gameplayrender], info);
-                            }
-                        }
+                        // {
+                        //     canvas.DrawCircle(x_rendering[cnt_gameplayrender], y_rendering[cnt_gameplayrender], (float)0.01 * info.Width, paint);
+                        // if (x_rendering[cnt_gameplayrender] > (float)(info.Width * 0.75))
+                        // {
+                        //     GoalBlockDamageCount(Game_level, x_rendering[cnt_gameplayrender], y_rendering[cnt_gameplayrender], info);
+                        // }
+                        // }
                         //Ball Rendering End and Finish Condition Check
                         //else
-                        if(enable_rendering)
+                        if (enable_rendering)
                         {
                             //Game End Setting, Variable initialization
                             GameEndandInitSetting(sender, Game_level, surface, info);
@@ -803,7 +806,7 @@ namespace ParbolicMotionGame.ViewModels
             pos_y_ceiling_touch = false;
             //int pre_cnt_gameplayrender = cnt_gameplayrender; //0,5,10...
             //for (int i = 0; i < info.Width * 2; i++)
-            if(!enable_rendering)
+            if (!enable_rendering)
             {
                 //if (i == -1) continue;
 
@@ -920,7 +923,7 @@ namespace ParbolicMotionGame.ViewModels
                     enable_rendering = true;
                     //cnt_rendering = i;
                     //break;
-                    
+
                 }
             }
 
@@ -928,12 +931,16 @@ namespace ParbolicMotionGame.ViewModels
 
         private void PredictPostionCalculate(SKCanvas canvas, SKImageInfo info, float Vo_test, float control_rcos_abs, float control_rsin_abs)
         {
-            pos_y_ceiling_touchIncrease = 0;
+            //pos_y_ceiling_touchIncrease = 0;
 
-            pos_y_ceiling_touch = false;
-            for (int i = 0; i < info.Width * 2; i++)
+            //pos_y_ceiling_touch = false;
+
+            //for (int i = 0; i < info.Width * 2; i++)
+            int i = cnt_gameplayrender;
+            //for(int i = cnt_gameplayrender; i < cnt_gameplayrender + 1; i++)
             {
-                if (i == -1) continue;
+                //if (i == -1) continue;
+                if (i == -1) return;
 
                 float t = (float)i / 80;
                 float g = 5 * t;
@@ -966,13 +973,13 @@ namespace ParbolicMotionGame.ViewModels
                  * Ball Touch DefenceWall True or False
                  */
                 DefenceWallTouchJudge(Game_level, x, y, info);
-                
+
                 switch (Game_level)
                 {
                     case 1:
                         if (wall_pn[0])
                         {
-                            x = (defencewall_1_x[0]-ballsize) * info.Width + ((defencewall_1_x[0] - ballsize) * info.Width - x);
+                            x = (defencewall_1_x[0] - ballsize) * info.Width + ((defencewall_1_x[0] - ballsize) * info.Width - x);
                         }
                         break;
                     case 2:
@@ -992,7 +999,7 @@ namespace ParbolicMotionGame.ViewModels
                         {
                             x = (defencewall_4_x_1[0] - ballsize) * info.Width + ((defencewall_4_x_1[0] - ballsize) * info.Width - x);
                         }
-                        if (wall_pn_sub[3] != true && x >= (defencewall_4_x_2[0]-ballsize) * info.Width &&
+                        if (wall_pn_sub[3] != true && x >= (defencewall_4_x_2[0] - ballsize) * info.Width &&
                             x <= (defencewall_4_x_2[0] + ballsize) * info.Width && y >= defencewall_4_y_2[0] * info.Height
                             && y <= defencewall_4_y_2[1] * info.Height)
                         {
@@ -1003,7 +1010,7 @@ namespace ParbolicMotionGame.ViewModels
                         {
                             x = (defencewall_4_x_2[0] - ballsize) * info.Width + ((defencewall_4_x_2[0] - ballsize) * info.Width - x);
 
-                            if (wall_pn_Level4_main[1] != 1 && x >= (defencewall_4_x_1[0]+ballsize) * info.Width && x <= (defencewall_4_x_1[0] + ballsize*2) * info.Width
+                            if (wall_pn_Level4_main[1] != 1 && x >= (defencewall_4_x_1[0] + ballsize) * info.Width && x <= (defencewall_4_x_1[0] + ballsize * 2) * info.Width
                                 && y >= defencewall_4_y_1[0] * info.Height && y <= defencewall_4_y_1[1] * info.Height)
                             {
                                 wall_pn_Level4_main[1] = 1;
@@ -1011,10 +1018,13 @@ namespace ParbolicMotionGame.ViewModels
                         }
                         //공이 A B 벽이 있을 경우,
                         //B벽을 맞고 A벽을 맞을때 공의 위치 계산
-                        // A<-->B , A와B 벽사이의 거리 *2 만큼 x위치에서 빼준다.
+                        // A<-->B , A와B 벽사이의 거리 *2 만큼 x위치에서 빼준다. (0.3f)
+                        // + (ball_size * 4) : 위치 보정
                         if (wall_pn_Level4_main[1] == 1)
                         {
-                            x = (float)(Vo_test * control_rcos_abs) * t + Init_x - 0.3f * info.Width;
+                            float x_correction = (defencewall_4_x_1[1] - defencewall_4_x_1[0]) * 2 - (ballsize * 4);
+                            x = (float)(Vo_test * control_rcos_abs) * t + Init_x - x_correction * info.Width;
+                            //x = (defencewall_4_x_1[0] - ballsize) * info.Width + ((defencewall_4_x_1[0] - ballsize) * info.Width - x);
                             wall_pn_sub[3] = false;
 
                             if (x >= (defencewall_4_x_2[0] - ballsize) * info.Width && x <= (defencewall_4_x_2[0]) * info.Width
@@ -1030,16 +1040,21 @@ namespace ParbolicMotionGame.ViewModels
                     case 5:
                         if (wall_pn[4])
                         {
-                            x = (defencewall_5_x_1[0]-ballsize) * info.Width + ((defencewall_5_x_1[0] - ballsize) * info.Width - x);
+                            x = (x_correction_level5 - ballsize) * info.Width + ((x_correction_level5 - ballsize) * info.Width - x);
                         }
                         break;
                     default:
                         break;
                 }
                 //Add : for pre-rendering
-                cnt_rendering = i;
                 x_rendering[i] = x;
                 y_rendering[i] = y;
+
+                canvas.DrawCircle(x_rendering[i], y_rendering[i], (float)0.01 * info.Width, paint);
+                if (x_rendering[i] > (float)(info.Width * 0.75))
+                {
+                    GoalBlockDamageCount(Game_level, x_rendering[i], y_rendering[i], info);
+                }
 
                 // GAME END
                 // End rendering point save
@@ -1047,9 +1062,11 @@ namespace ParbolicMotionGame.ViewModels
                 {
                     enable_rendering = true;
                     cnt_rendering = i;
-                    break;
+                    //break;
+                    return;
                 }
             }
+            //cnt_rendering = cnt_gameplayrender+10;
 
         }
 
@@ -1058,16 +1075,16 @@ namespace ParbolicMotionGame.ViewModels
             if (TouchOnOff)
             {
                 //paintInitBall, 예측 공 Paint
-                for (int i = 1; i < Vo_test_Power/100; i++)
+                for (int i = 1; i < Vo_test_Power / 100; i++)
                 {
-                    float Predict_t = 0.125f * i/2;
+                    float Predict_t = 0.125f * i / 2;
                     float Predict_g = 5 * Predict_t;
                     float Predict_x = (float)(Game_power * control_rcos_abs) * Predict_t + Init_x;
                     float Predict_y = ((float)(Game_power * control_rsin_abs) * Predict_t - Predict_g * Predict_t * 4);
                     Predict_y = Init_y - Predict_y;
 
-                    canvas.DrawCircle(Predict_x, Predict_y, 
-                        (float)(0.01-0.0005*i) * info.Width , paint);
+                    canvas.DrawCircle(Predict_x, Predict_y,
+                        (float)(0.01 - 0.0005 * i) * info.Width, paint);
                 }
             }
         }
@@ -1087,7 +1104,7 @@ namespace ParbolicMotionGame.ViewModels
                 StrokeWidth = 1
             };
 
-            string game_over_text = "LEVEL"+game_level;
+            string game_over_text = "LEVEL" + game_level;
 
             //Adjust TextSize property so text is 95% of screen width
             float textWidth = textPaint.MeasureText(game_over_text);
@@ -1098,7 +1115,7 @@ namespace ParbolicMotionGame.ViewModels
             textPaint.MeasureText(game_over_text, ref textBounds);
 
             // Calculate offsets to center the text on the screen
-            float xText = (float)0.1*info.Width;
+            float xText = (float)0.1 * info.Width;
             float yText = (float)0.1 * info.Height;
 
             //And draw the text
@@ -1234,7 +1251,7 @@ namespace ParbolicMotionGame.ViewModels
             switch (LEVEL)
             {
                 case 1:
-                    if (wall_pn[0] != true && x >= (defencewall_1_x[0]-ballsize) * info.Width &&
+                    if (wall_pn[0] != true && x >= (defencewall_1_x[0] - ballsize) * info.Width &&
                         x <= (defencewall_1_x[1] - ballsize) * info.Width && y >= defencewall_1_y[0] * info.Height
                         && y <= defencewall_1_y[1] * info.Height)
                     {
@@ -1243,45 +1260,45 @@ namespace ParbolicMotionGame.ViewModels
                     break;
                 case 2:
                     if (wall_pn[1] != true && x >= (defencewall_2_x[0] - ballsize) * info.Width &&
-                        x <= (defencewall_2_x[0] + ballsize*2) * info.Width && y >= defencewall_2_y[0] * info.Height
+                        x <= (defencewall_2_x[0] + ballsize * 2) * info.Width && y >= defencewall_2_y[0] * info.Height
                         && y <= defencewall_2_y[1] * info.Height)
                     {
                         wall_pn[1] = true;
                     }
                     break;
                 case 3:
-                    if (wall_pn[2] != true && x >= (defencewall_3_x[0]-ballsize) * info.Width &&
-                        x <= (defencewall_3_x[0] + ballsize*2) * info.Width && y >= defencewall_3_y[0] * info.Height
-                        && y <= (defencewall_3_y[0] / 10 + defencewall_3_y[0]) * info.Height)
+                    float wall_temp = (defencewall_3_y[1] - defencewall_3_y[0]) / 10f; //0.06f
+                    if (wall_pn[2] != true && x >= (defencewall_3_x[0] - ballsize) * info.Width &&
+                        x <= (defencewall_3_x[0] + ballsize * 2) * info.Width && y >= defencewall_3_y[0] * info.Height
+                        && y <= (defencewall_3_y[0]+wall_temp) * info.Height) 
                     {
                         wall_pn[2] = true;
                         xpos_mirror = (defencewall_3_x[0] - ballsize);
                     }
                     else if (wall_pn[2] != true && x >= (defencewall_3_x[0] + ballsize) * info.Width &&
-                        x <= (defencewall_3_x[0] + ballsize * 3) * info.Width && y >= defencewall_3_y[0] * info.Height
-                        && y <= (defencewall_3_y[0] / 10 + defencewall_3_y[0]) * info.Height)
+                        x <= (defencewall_3_x[0] + ballsize * 3) * info.Width && y >= (defencewall_3_y[0] + wall_temp) * info.Height
+                        && y <= (defencewall_3_y[0] + wall_temp*2) * info.Height)
                     {
                         wall_pn[2] = true;
                         xpos_mirror = (defencewall_3_x[0] + ballsize);
                     }
                     else if (wall_pn[2] != true && x >= (defencewall_3_x[0] + ballsize * 4) * info.Width &&
-                        x <= (defencewall_3_x[0] + ballsize * 6) * info.Width && y >= (defencewall_3_y[0] / 10 + defencewall_3_y[0]) * info.Height
-                        && y <= ((defencewall_3_y[0]*2) / 10 + defencewall_3_y[0]) * info.Height)
-
+                        x <= (defencewall_3_x[0] + ballsize * 6) * info.Width && y >= (defencewall_3_y[0] + wall_temp * 2) * info.Height
+                        && y <= (defencewall_3_y[0] + wall_temp * 3) * info.Height)
                     {
                         wall_pn[2] = true;
                         xpos_mirror = (defencewall_3_x[0] + ballsize * 4);
                     }
                     else if (wall_pn[2] != true && x >= (defencewall_3_x[0] + ballsize * 7) * info.Width &&
-                        x <= (defencewall_3_x[0] + ballsize * 10) * info.Width && y >= ((defencewall_3_y[0]*2) / 10 + defencewall_3_y[0]) * info.Height
-                        && y <= ((defencewall_3_y[0] * 3) / 10 + defencewall_3_y[0]) * info.Height)
+                        x <= (defencewall_3_x[0] + ballsize * 10) * info.Width && y >= (defencewall_3_y[0] + wall_temp * 3) * info.Height
+                        && y <= (defencewall_3_y[0] + wall_temp * 4) * info.Height)
                     {
                         wall_pn[2] = true;
                         xpos_mirror = (defencewall_3_x[0] + ballsize * 7);
                     }
                     else if (wall_pn[2] != true && x >= (defencewall_3_x[0] + ballsize * 10) * info.Width &&
-                        x <= (defencewall_3_x[0] + ballsize * 12) * info.Width && y >= ((defencewall_3_y[0] * 3) / 10 + defencewall_3_y[0]) * info.Height
-                        && y <= ((defencewall_3_y[0] * 4) / 10 + defencewall_3_y[0]) * info.Height)
+                        x <= (defencewall_3_x[0] + ballsize * 12) * info.Width && y >= (defencewall_3_y[0] + wall_temp * 4) * info.Height
+                        && y <= (defencewall_3_y[0] + wall_temp * 5) * info.Height)
                     {
                         wall_pn[2] = true;
                         xpos_mirror = (defencewall_3_x[0] + ballsize * 10);
@@ -1289,7 +1306,7 @@ namespace ParbolicMotionGame.ViewModels
                     break;
 
                 case 4:
-                    if (wall_pn[3] != true && x >= (defencewall_4_x_1[0]-ballsize) * info.Width &&
+                    if (wall_pn[3] != true && x >= (defencewall_4_x_1[0] - ballsize) * info.Width &&
                         x <= (defencewall_4_x_1[0] + ballsize) * info.Width && y >= defencewall_4_y_1[0] * info.Height
                         && y <= defencewall_4_y_1[1] * info.Height)
                     {
@@ -1297,18 +1314,19 @@ namespace ParbolicMotionGame.ViewModels
                     }
                     break;
                 case 5:
-                    if (wall_pn[4] != true && x >= (defencewall_5_x_1[0]-ballsize) * info.Width 
-                        && x <= (defencewall_5_x_1[0] + ballsize) * info.Width) 
+                    if (wall_pn[4] != true && x >= (defencewall_5_x_1[0] - ballsize) * info.Width
+                        && x <= (defencewall_5_x_1[0] + ballsize) * info.Width)
                     {
                         //y좌표가 0~0.2info.height, 0.4~0.6만 통과한다.
-                        if ( y >= defencewall_5_y_2[0] * info.Height && y <= defencewall_5_y_2[1] * info.Height )
+                        if (y >= defencewall_5_y_2[0] * info.Height && y <= defencewall_5_y_2[1] * info.Height)
                         {
                             wall_pn[4] = true;
                         }
-                        if( y >= defencewall_5_y_1[0] * info.Height && y <= defencewall_5_y_1[1] * info.Height )
+                        if (y >= defencewall_5_y_1[0] * info.Height && y <= defencewall_5_y_1[1] * info.Height)
                         {
                             wall_pn[4] = true;
                         }
+                        x_correction_level5 = defencewall_5_x_1[0] - ballsize;
                     }
                     break;
 
@@ -1488,7 +1506,7 @@ namespace ParbolicMotionGame.ViewModels
             {
                 case 1:
                     for (int i = 0; i < 16; i++)
-                            canvas.DrawRect(rect[i], paintGoalBlock);
+                        canvas.DrawRect(rect[i], paintGoalBlock);
                     break;
                 case 2:
                     for (int i = 1; i < 4; i++)
@@ -1542,7 +1560,7 @@ namespace ParbolicMotionGame.ViewModels
                 Style = SKPaintStyle.Fill,
                 Color = Color.Blue.ToSKColor()
             };
-            switch(LEVEL)
+            switch (LEVEL)
             {
                 case 1:
                     for (int i = 0; i < 16; i++)
@@ -1562,12 +1580,12 @@ namespace ParbolicMotionGame.ViewModels
                 case 2:
                     for (int i = 1; i < 4; i++)
                     {
-                        for(int j = 0; j < 3; j++)
+                        for (int j = 0; j < 3; j++)
                         {
                             int position = i + j * 4;
                             if (rect_pn[position])
                                 canvas.DrawRect(rect[position], paintGoalBlock);
-                            else 
+                            else
                             {
                                 timer_stop_PN_BlockRotation = true;
 
@@ -1753,10 +1771,7 @@ namespace ParbolicMotionGame.ViewModels
                 case 1:
                     SKPoint[] DefenceWallLevel_1 = new SKPoint[4];
                     DefenceWallLevel_1[0] = new SKPoint(defencewall_1_x[0] * info.Width, defencewall_1_y[0] * info.Height);
-                    //DefenceWallLevel_1[1] = new SKPoint(defencewall_1_x[1] * info.Width, defencewall_1_y[0] * info.Height);
                     DefenceWallLevel_1[2] = new SKPoint(defencewall_1_x[0] * info.Width, defencewall_1_y[1] * info.Height);
-                    //DefenceWallLevel_1[3] = new SKPoint(defencewall_1_x[1] * info.Width, defencewall_1_y[1] * info.Height);
-
                     SKPaint paintDefenceWallLevel_1 = new SKPaint
                     {
                         Style = SKPaintStyle.Fill,
@@ -1768,11 +1783,6 @@ namespace ParbolicMotionGame.ViewModels
                     break;
                 case 2:
                     SKPoint[] DefenceWallLevel_2 = new SKPoint[4];
-                    // DefenceWallLevel_2[0] = new SKPoint((float)0.55 * info.Width, (float)0.15 * info.Height);
-                    // DefenceWallLevel_2[1] = new SKPoint((float)0.56 * info.Width, (float)0.15 * info.Height);
-                    // DefenceWallLevel_2[2] = new SKPoint((float)0.55 * info.Width, (float)0.7 * info.Height);
-                    // DefenceWallLevel_2[3] = new SKPoint((float)0.56 * info.Width, (float)0.7 * info.Height);
-
                     DefenceWallLevel_2[0] = new SKPoint(defencewall_2_x[0] * info.Width, defencewall_2_y[0] * info.Height);
                     DefenceWallLevel_2[1] = new SKPoint(defencewall_2_x[1] * info.Width, defencewall_2_y[0] * info.Height);
                     DefenceWallLevel_2[2] = new SKPoint(defencewall_2_x[0] * info.Width, defencewall_2_y[1] * info.Height);
@@ -1788,8 +1798,6 @@ namespace ParbolicMotionGame.ViewModels
                     break;
                 case 3:
                     SKPoint[] DefenceWallLevel_3 = new SKPoint[4];
-                    // DefenceWallLevel_3[0] = new SKPoint((float)0.5 * info.Width,  (float)0.15 * info.Height);
-                    // DefenceWallLevel_3[3] = new SKPoint((float)0.7 * info.Width,  (float)0.75 * info.Height);
                     DefenceWallLevel_3[0] = new SKPoint(defencewall_3_x[0] * info.Width, defencewall_3_y[0] * info.Height);
                     DefenceWallLevel_3[3] = new SKPoint(defencewall_3_x[1] * info.Width, defencewall_3_y[1] * info.Height);
 
@@ -1856,8 +1864,8 @@ namespace ParbolicMotionGame.ViewModels
 
         public void TouchTitle(object sender, SKTouchEventArgs e)
         {
-             if(GameState == (int)GameStartCondition.GameTitle)
-             {
+            if (GameState == (int)GameStartCondition.GameTitle)
+            {
                 game_start_touch_enable = false;
                 //DeviceTimer_Wall(sender);
                 //GameState Change
@@ -1894,16 +1902,16 @@ namespace ParbolicMotionGame.ViewModels
 
                         dis = (float)(Math.Pow(Init_x - default_Init_x, 2) + Math.Pow(Init_y - default_Init_y, 2));
                         dis_init_circle = (float)Math.Sqrt(dis);
-                        
+
                         control_rcos = (Init_x - default_Init_x) / dis_init_circle;
                         control_rsin = (Init_y - default_Init_y) / dis_init_circle;
-                        
+
                         if (dis_init_circle >= default_radius_move_allow)
                         {
                             Init_x = control_rcos * default_radius_move_allow + default_Init_x;
                             Init_y = control_rsin * default_radius_move_allow + default_Init_y;
                         }
-                        
+
                         if (e.Location.X >= InitConstant_X)
                         {
                             Init_x = InitConstant_X;
@@ -1927,7 +1935,8 @@ namespace ParbolicMotionGame.ViewModels
                         game_touch_enable = false;
                         TouchOnOff = false;
 
-                        StartTimer_BallWallTouch(sender);
+                        PredictDrawThreadOnOff = true;
+                        //StartTimer_BallWallTouch(sender);
 
                         // GameState Change
                         GameState = (int)GameStartCondition.GamePlay;
@@ -1968,27 +1977,27 @@ namespace ParbolicMotionGame.ViewModels
 
         private void GoalBlockRectPosition(SKImageInfo info, SKCanvas canvas, SKPaint paint_GoalBlock)
         {
-             //LEVEL1 Goal Point Block Location Setting
-             for (int i = 0; i < 5; i++)
-             {
-                 rect_point[i] = (float)(info.Width * 0.75 + info.Width * (0.25 / 4) * i);
-             }
-             rect_point[5] = (float)(info.Height * 0.2);
-             rect_point[6] = (float)(info.Height * 0.4);
-             rect_point[7] = (float)(info.Height * 0.6);
-             rect_point[8] = (float)(info.Height * 0.8);
-             rect_point[9] = (float)(info.Height);
-             for (int i = 0; i < 16; i++)
-             {
-                 rect[i] = new SKRect(rect_point[i % 4], rect_point[i / 4 + 5],
-                     rect_point[(i % 4) + 1], rect_point[i / 4 + 6]);
-             
-                 // canvas.DrawRect(rect[i], paint_GoalBlock);
-             }
+            //LEVEL1 Goal Point Block Location Setting
+            for (int i = 0; i < 5; i++)
+            {
+                rect_point[i] = (float)(info.Width * 0.75 + info.Width * (0.25 / 4) * i);
+            }
+            rect_point[5] = (float)(info.Height * 0.2);
+            rect_point[6] = (float)(info.Height * 0.4);
+            rect_point[7] = (float)(info.Height * 0.6);
+            rect_point[8] = (float)(info.Height * 0.8);
+            rect_point[9] = (float)(info.Height);
+            for (int i = 0; i < 16; i++)
+            {
+                rect[i] = new SKRect(rect_point[i % 4], rect_point[i / 4 + 5],
+                    rect_point[(i % 4) + 1], rect_point[i / 4 + 6]);
+
+                // canvas.DrawRect(rect[i], paint_GoalBlock);
+            }
         }
         private void InitBallPostion(int LEVEL, SKImageInfo info)
         {
-            switch(LEVEL)
+            switch (LEVEL)
             {
                 case 1:
                     //LEVEL1 Init Location Constant
@@ -2112,10 +2121,10 @@ namespace ParbolicMotionGame.ViewModels
         {
             dis = (float)(Math.Pow(Init_x - default_Init_x, 2) + Math.Pow(Init_y - default_Init_y, 2));
             dis_init_circle = (float)Math.Sqrt(dis);
-            
+
             control_rcos = (Init_x - default_Init_x) / dis_init_circle;
             control_rsin = (Init_y - default_Init_y) / dis_init_circle;
-            
+
             if (dis_init_circle >= default_radius_move_allow)
             {
                 Init_x = control_rcos * default_radius_move_allow + default_Init_x;
@@ -2135,7 +2144,7 @@ namespace ParbolicMotionGame.ViewModels
 
         private void GameEndandInitSetting(object sender, int LEVEL, SKSurface surface, SKImageInfo info)
         {
-                        
+
             //enable_rendering = true;
             for (int i = 0; i <= cnt_rendering; i++)
             {
@@ -2146,6 +2155,7 @@ namespace ParbolicMotionGame.ViewModels
             /*
              *  reset Setting
              */
+            PredictDrawThreadOnOff = false;
             cnt_gameplayrender = 0;
             //BlockRotationCnt = 0;
             //parabolic_cnt = 0;
@@ -2185,7 +2195,7 @@ namespace ParbolicMotionGame.ViewModels
                 Init_y = 0;
                 GameState = (int)GameStartCondition.GameEnd;
                 //Init rect_pn
-                switch(LEVEL)
+                switch (LEVEL)
                 {
                     case 1:
                         for (int j = 0; j < 16; j++)
@@ -2199,9 +2209,9 @@ namespace ParbolicMotionGame.ViewModels
                         }
                         break;
                     case 2:
-                        for(int i = 1; i < 4; i++)
+                        for (int i = 1; i < 4; i++)
                         {
-                            for(int j = 0; j < 3; j++)
+                            for (int j = 0; j < 3; j++)
                             {
                                 if (!rect_pn[i + j * 4])
                                 {
@@ -2273,7 +2283,7 @@ namespace ParbolicMotionGame.ViewModels
                 EndWaitTime(1000); // Add for End Btn Image
                 Gameover_textdraw(sender, surface, info);
                 timer_stop();
-                timer_stop_ballwalltouch();
+                //timer_stop_ballwalltouch();
             }
             else
             {
@@ -2287,33 +2297,33 @@ namespace ParbolicMotionGame.ViewModels
 
         private void GameStartTitle_textdraw(object sender, SKSurface surface, SKImageInfo info)
         {
-             SKCanvas canvas = surface.Canvas;
-             SKPaint textPaint = new SKPaint
-             {
-                 Style = SKPaintStyle.Fill,
-                 Color = Color.Red.ToSKColor(),
-                 FakeBoldText = true,
-                 StrokeWidth = 1
-             };
-             string game_Title_text = "START TOUCH!";
-             
-             //Adjust TextSize property so text is 95% of screen width
-             float textWidth = textPaint.MeasureText(game_Title_text);
-             textPaint.TextSize = 0.2f * info.Width * textPaint.TextSize / textWidth;
-             
-             //Find the text bounds
-             SKRect textBounds = new SKRect();
-             textPaint.MeasureText(game_Title_text, ref textBounds);
-             
-             // Calculate offsets to Low center the text on the screen
-             float xText = info.Width / 2 - textBounds.MidX;
-             float yText = info.Height * 0.8f;
-             
-             //And draw the text
-             canvas.DrawText(game_Title_text, xText, yText, textPaint);
-             //canvas.Restore();
-             EndWaitTime(1000);
-             return;
+            SKCanvas canvas = surface.Canvas;
+            SKPaint textPaint = new SKPaint
+            {
+                Style = SKPaintStyle.Fill,
+                Color = Color.Red.ToSKColor(),
+                FakeBoldText = true,
+                StrokeWidth = 1
+            };
+            string game_Title_text = "START TOUCH!";
+
+            //Adjust TextSize property so text is 95% of screen width
+            float textWidth = textPaint.MeasureText(game_Title_text);
+            textPaint.TextSize = 0.2f * info.Width * textPaint.TextSize / textWidth;
+
+            //Find the text bounds
+            SKRect textBounds = new SKRect();
+            textPaint.MeasureText(game_Title_text, ref textBounds);
+
+            // Calculate offsets to Low center the text on the screen
+            float xText = info.Width / 2 - textBounds.MidX;
+            float yText = info.Height * 0.8f;
+
+            //And draw the text
+            canvas.DrawText(game_Title_text, xText, yText, textPaint);
+            //canvas.Restore();
+            EndWaitTime(1000);
+            return;
         }
 
         private void Gameover_textdraw(object sender, SKSurface surface, SKImageInfo info)
@@ -2420,7 +2430,7 @@ namespace ParbolicMotionGame.ViewModels
             game_over = false;
 
             timer_stop_PN = false;
-            TouchOnOff = true; 
+            TouchOnOff = true;
             drag_onoff = true; //Initial x,y 
             Init_x = 0;
             Init_y = 0;
@@ -2449,7 +2459,7 @@ namespace ParbolicMotionGame.ViewModels
             //((MainPage)sender).CanvasView3_Invalidate();
         }
 
-        public void Debug_GameLevelUp(object sender, EventArgs e, Button gamecontinue_btn)
+        public void Debug_GameLevelUp(object sender, EventArgs e)
         {
             //Add for Operation Safety
             EndWaitTime(1000);
@@ -2472,7 +2482,7 @@ namespace ParbolicMotionGame.ViewModels
             Game_Btn_Visible = false;
             Game_Btn_Enable = true;
         }
-        public void Debug_GameLevelDown(object sender, EventArgs e, Button gamecontinue_btn)
+        public void Debug_GameLevelDown(object sender, EventArgs e)
         {
             //Add for Operation Safety
             EndWaitTime(1000);
@@ -2644,7 +2654,7 @@ namespace ParbolicMotionGame.ViewModels
                             //Main Wall : Down Motion
                             //Sub Wall : Down Motion
                             {
-                                defencewall_5_y_1[0] = 0.15f + 0.006f * (cnt_defencewallrendering_5- 49);
+                                defencewall_5_y_1[0] = 0.15f + 0.006f * (cnt_defencewallrendering_5 - 49);
                                 defencewall_5_y_1[1] = 0.4f + 0.006f * (cnt_defencewallrendering_5 - 49);
                                 defencewall_5_y_2[0] = 0.6f + 0.003f * (cnt_defencewallrendering_5 - 49);
                                 defencewall_5_y_2[1] = 0.8f + 0.003f * (cnt_defencewallrendering_5 - 49);
@@ -2714,7 +2724,7 @@ namespace ParbolicMotionGame.ViewModels
         {
             //if (timer_stop_PN)
             //{
-                timer_start(MY_TIMER_TICK_OBJECT, sender, 0, time_interval);
+            timer_start(MY_TIMER_TICK_OBJECT, sender, 0, time_interval);
             //}
         }
         private void timer_start(TimerCallback callback, object sender, int start, int time_interval)
@@ -2726,14 +2736,17 @@ namespace ParbolicMotionGame.ViewModels
         {
             await Task.Run(() =>
             {
-                
+
                 parabolic_cnt++;
                 ((SKCanvasView)state_sender).InvalidateSurface();
-                
+                //PredictPostionCalculate_thread(Vo_test, control_rcos_abs, control_rsin_abs);
+                //Thread.Sleep(5);
                 //if(timer_stop_PN_BlockRotation)
                 //{
                 //    BlockRotationCnt++;
                 //}
+                //if (PredictDrawThreadOnOff)
+                //    PredictPostionCalculate_thread(Vo_test, control_rcos_abs, control_rsin_abs);
             });
         }
 
@@ -2744,6 +2757,7 @@ namespace ParbolicMotionGame.ViewModels
         private void timer_start_BallWallTouch(TimerCallback callback, object sender, int start, int time_interval)
         {
             timer_BallWallTouch = new System.Threading.Timer(callback, sender, start, time_interval);
+            //new System.Threading.Timer(callback, sender, start, time_interval);
         }
 
         private async void MY_TIMER_TICK_OBJECT2(object sender)
@@ -2751,7 +2765,9 @@ namespace ParbolicMotionGame.ViewModels
             await Task.Run(() =>
             {
                 //TODO: Calculate Function Make...
+                // if(PredictDrawThreadOnOff)
                 PredictPostionCalculate_thread(Vo_test, control_rcos_abs, control_rsin_abs);
+
             });
         }
 
@@ -2772,10 +2788,24 @@ namespace ParbolicMotionGame.ViewModels
         private void timer_stop_wall()
         {
             timer_wall.Dispose();
-            
+
+        }
+        public void Thread_Func_Canvas()
+        {
+            Thread canvasThread = Thread.CurrentThread;
         }
 
-#region notifyproperty
+        private async static void canvasdrawonly(object state_sender)
+        {
+            await Task.Run(() =>
+            {
+
+                parabolic_cnt++;
+                ((SKCanvasView)state_sender).InvalidateSurface();
+            });
+        }
+
+        #region notifyproperty
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void NotifyPropertyChanged(string propertyName)
         {
@@ -2784,6 +2814,6 @@ namespace ParbolicMotionGame.ViewModels
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-#endregion
+        #endregion
     }
 }

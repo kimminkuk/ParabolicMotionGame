@@ -78,18 +78,6 @@ namespace ParbolicMotionGame
             CanvasView3.InvalidateSurface();
         }
 
-        async public void Button_Clicked(object sender, EventArgs e)
-        {
-            
-            CanvasView1 canvasView1 = (CanvasView1)BindingContext;
-            bool answer = await DisplayAlert("Question?", "Would you save Record?", "Yes", "No");
-
-            canvasView1.BTN_game_continue(sender, e, gamecontinue_btn, answer, ref parabolicDB);
-            if(answer)
-              await Navigation.PushModalAsync(new AddGameDBPage(parabolicDBManager, parabolicDBs, parabolicDB));
-            CanvasView1_Invalidate();
-        }
-
         async private void OnTapGestureRecognizerTapped(object sender, EventArgs e)
         {
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
@@ -114,7 +102,7 @@ namespace ParbolicMotionGame
         private void Button_Clicked_LevelUp(object sender, EventArgs e)
         {
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
-            canvasView1.Debug_GameLevelUp(sender, e, gamecontinue_btn);
+            canvasView1.Debug_GameLevelUp(sender, e);
 
             CanvasView1_Invalidate();
         }
@@ -123,7 +111,7 @@ namespace ParbolicMotionGame
         private void Button_Clicked_LevelDown(object sender, EventArgs e)
         {
             CanvasView1 canvasView1 = (CanvasView1)BindingContext;
-            canvasView1.Debug_GameLevelDown(sender, e, gamecontinue_btn);
+            canvasView1.Debug_GameLevelDown(sender, e);
 
             CanvasView1_Invalidate();
         }
@@ -137,12 +125,5 @@ namespace ParbolicMotionGame
             CanvasView1_Invalidate();
         }
 
-        public void Button_View(bool onoff)
-        {
-            if (onoff)
-                gamecontinue_btn.IsVisible = true;
-            else
-                gamecontinue_btn.IsVisible = false;
-        }
     }
 }

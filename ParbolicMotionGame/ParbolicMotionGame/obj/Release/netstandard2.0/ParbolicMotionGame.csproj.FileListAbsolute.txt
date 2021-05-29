@@ -12,3 +12,4 @@ C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotion
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Release\netstandard2.0\ParbolicMotionGame.dll
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Release\netstandard2.0\ref\ParbolicMotionGame.dll
 C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Release\netstandard2.0\ParbolicMotionGame.pdb
+C:\Users\rlaal\source\repos\ParbolicMotionGame\ParbolicMotionGame\ParbolicMotionGame\obj\Release\netstandard2.0\RankingPage\GameRankingPage.xaml.g.cs

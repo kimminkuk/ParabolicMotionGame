@@ -87,14 +87,6 @@
                 </Label.GestureRecognizers>
             </Label>
 
-            <Button Text="continue?" FontSize="24" FontFamily="Yet R"
-                    x:Name="gamecontinue_btn"
-                    HorizontalOptions="Fill"
-                    Grid.Row="1" Grid.RowSpan="2" Grid.Column="8"
-                    Clicked="Button_Clicked" IsVisible="{Binding Game_Btn_Visible}"
-                    IsEnabled="{Binding Game_Btn_Enable}"
-                    TextColor="Black"/>
-            
             <Button Text="+++" FontSize="12" FontFamily="Yet R"
                     x:Name="GameDebugTool_LevelUp"
                     Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
@@ -107,15 +99,6 @@
                     Clicked="Button_Clicked_LevelDown" IsVisible="{Binding GameDebugLevelDown_Visble}"
                     IsEnabled="{Binding GameDebugLevelDown_Enable}"
                     TextColor="Black"/>
-
-            <Button Text="TOUCH START" FontSize="24" FontFamily="Yet R"
-                    x:Name="GameStartTitleButton"
-                    Grid.Row="1"
-                    Grid.RowSpan="2"
-                    Grid.ColumnSpan="9"
-                    Clicked="Button_Clicked_StartTitle" IsVisible="{Binding GameStartTitle_Visible}"
-                    IsEnabled="{Binding GameStartTitle_Enable}"
-                    TextColor="Red"/>
 
             <skia:SKCanvasView x:Name="CanvasView"
                                PaintSurface="CanvasView_PaintSurface"

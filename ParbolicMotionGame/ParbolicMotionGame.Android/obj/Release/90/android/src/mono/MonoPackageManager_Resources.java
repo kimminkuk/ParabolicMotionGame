@@ -4,6 +4,7 @@ public class MonoPackageManager_Resources {
 		/* We need to ensure that "ParbolicMotionGame.Android.dll" comes first in this list. */
 		"ParbolicMotionGame.Android.dll",
 		"FormsViewGroup.dll",
+		"Newtonsoft.Json.dll",
 		"ParbolicMotionGame.dll",
 		"SkiaSharp.dll",
 		"SkiaSharp.Views.Android.dll",
@@ -52,5 +53,4 @@ public class MonoPackageManager_Resources {
 	};
 	public static String[] Dependencies = new String[]{
 	};
-	public static String ApiPackageName = null;
 }
