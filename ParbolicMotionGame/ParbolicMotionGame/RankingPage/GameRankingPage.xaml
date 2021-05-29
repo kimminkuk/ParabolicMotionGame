@@ -17,8 +17,9 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.RowSpan="11" Grid.Column="1" Grid.ColumnSpan="8">
-            <ListView ItemsSource="{Binding}">
-                <ListView.ItemTemplate>
+                <ListView x:Name="UserListView"
+                 ItemsSource="{Binding parabolicDBs_react}">
+                    <ListView.ItemTemplate>
                     <DataTemplate>
                             <TextCell Text="{Binding NameParabolic_class}" Detail="{Binding LevelParabolic_class}">
                         </TextCell>

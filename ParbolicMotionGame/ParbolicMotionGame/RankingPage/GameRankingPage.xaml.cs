@@ -15,14 +15,18 @@ namespace ParbolicMotionGame.RankingPage
     public partial class GameRankingPage : ContentPage
     {
         readonly ParabolicDBManager parabolicDBManager = new ParabolicDBManager();
+
+        // ObservableCollection ?
+        readonly ObservableCollection<ParabolicDB> parabolicDBs_react = new ObservableCollection<ParabolicDB>();
         readonly IList<ParabolicDB> parabolicDBs = new ObservableCollection<ParabolicDB>();
         public GameRankingPage(object sender, EventArgs e)
         {
-            BindingContext = parabolicDBs;
+            //BindingContext = parabolicDBs;
+            BindingContext = parabolicDBs_react;
             InitializeComponent();
 
             //RankingView(sender , e);
-            //RankingView();
+            RankingView();
         }
 
         async void RankingView()
@@ -36,9 +40,9 @@ namespace ParbolicMotionGame.RankingPage
                 var GameDBCollection = await parabolicDBManager.GetAll();
                 foreach (ParabolicDB ItemDB in GameDBCollection)
                 {
-                    if (parabolicDBs.All(a => a.LevelParabolic_class != ItemDB.ScoreParabolic_class))
+                    if (parabolicDBs_react.All(a => a.LevelParabolic_class != ItemDB.ScoreParabolic_class))
                     {
-                        parabolicDBs.Add(ItemDB);
+                        parabolicDBs_react.Add(ItemDB);
                     }
                 }
             }
